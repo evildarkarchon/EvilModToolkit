@@ -120,11 +120,11 @@ public static class ServiceCollectionExtensions
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<OverviewViewModel>();
         services.AddTransient<F4SEViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<ToolsViewModel>();
 
         // TODO: Add other ViewModels as they are created in Phase 4:
         // services.AddTransient<ScannerViewModel>();
-        // services.AddTransient<ToolsViewModel>();
-        // services.AddTransient<SettingsViewModel>();
 
         return services;
     }

@@ -52,7 +52,12 @@ public class DependencyInjectionTests : IDisposable
         services.AddSingleton<ISettingsService, SettingsService>();
 
         // Register ViewModels (Transient)
+        // MainWindowViewModel depends on all child tab ViewModels
         services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<OverviewViewModel>();
+        services.AddTransient<F4SEViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<ToolsViewModel>();
 
         _serviceProvider = services.BuildServiceProvider();
     }

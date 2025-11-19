@@ -1,0 +1,186 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:EvilModToolkit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="EvilModToolkit.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="20">
+            <!-- Header with Action Buttons -->
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0"
+                          Text="Settings"
+                          FontSize="24"
+                          FontWeight="Bold"
+                          VerticalAlignment="Center"/>
+                <Button Grid.Column="1"
+                        Content="Reset Defaults"
+                        Command="{Binding ResetDefaultsCommand}"
+                        Margin="0,0,10,0"
+                        Padding="15,5"/>
+                <Button Grid.Column="2"
+                        Content="Save Settings"
+                        Command="{Binding SaveSettingsCommand}"
+                        Padding="20,5"/>
+            </Grid>
+
+            <!-- Game Paths Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="Game and Mod Manager Paths"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+                    <TextBlock Text="Leave empty to use automatic detection"
+                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                              FontSize="12"/>
+
+                    <!-- Game Path Override -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Fallout 4 Installation Path:"/>
+                        <TextBox Text="{Binding GamePathOverride}"
+                                Watermark="e.g., C:\Program Files\Steam\steamapps\common\Fallout 4"/>
+                    </StackPanel>
+
+                    <!-- MO2 Path Override -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Mod Organizer 2 Path:"/>
+                        <TextBox Text="{Binding MO2PathOverride}"
+                                Watermark="e.g., C:\Modding\MO2"/>
+                    </StackPanel>
+
+                    <!-- Vortex Path Override -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Vortex Path:"/>
+                        <TextBox Text="{Binding VortexPathOverride}"
+                                Watermark="e.g., C:\Program Files\Black Tree Gaming Ltd\Vortex"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Scanning Options Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="Scanning Options"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <!-- F4SE Scan Directory -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Last F4SE Scan Directory:"/>
+                        <TextBox Text="{Binding LastF4SEScanDirectory}"
+                                Watermark="e.g., C:\Games\Fallout 4\Data\F4SE\Plugins"/>
+                    </StackPanel>
+
+                    <!-- BA2 Patch Directory -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Last BA2 Patch Directory:"/>
+                        <TextBox Text="{Binding LastBA2PatchDirectory}"
+                                Watermark="e.g., C:\Games\Fallout 4\Data"/>
+                    </StackPanel>
+
+                    <!-- Scan Recursively -->
+                    <CheckBox Content="Scan F4SE plugins recursively (include subdirectories)"
+                             IsChecked="{Binding ScanF4SERecursively}"/>
+
+                    <!-- Show Hidden Files -->
+                    <CheckBox Content="Show hidden files and folders"
+                             IsChecked="{Binding ShowHiddenFiles}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Appearance Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="Appearance"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <!-- Theme Selection -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Theme:"/>
+                        <ComboBox SelectedItem="{Binding Theme}"
+                                 HorizontalAlignment="Left"
+                                 MinWidth="200">
+                            <ComboBoxItem Content="System"/>
+                            <ComboBoxItem Content="Light"/>
+                            <ComboBoxItem Content="Dark"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Window Size -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                        <StackPanel Grid.Column="0" Spacing="5">
+                            <TextBlock Text="Default Window Width:"/>
+                            <NumericUpDown Value="{Binding WindowWidth}"
+                                          Minimum="800"
+                                          Maximum="3840"
+                                          Increment="50"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="5">
+                            <TextBlock Text="Default Window Height:"/>
+                            <NumericUpDown Value="{Binding WindowHeight}"
+                                          Minimum="500"
+                                          Maximum="2160"
+                                          Increment="50"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Logging Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="Logging"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <!-- Log Level Selection -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Log Level:"/>
+                        <ComboBox SelectedItem="{Binding LogLevel}"
+                                 HorizontalAlignment="Left"
+                                 MinWidth="200">
+                            <ComboBoxItem Content="Trace"/>
+                            <ComboBoxItem Content="Debug"/>
+                            <ComboBoxItem Content="Information"/>
+                            <ComboBoxItem Content="Warning"/>
+                            <ComboBoxItem Content="Error"/>
+                            <ComboBoxItem Content="Critical"/>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Status Message -->
+            <TextBlock Text="{Binding StatusMessage}"
+                      IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                      Foreground="{DynamicResource SystemAccentColor}"/>
+
+            <!-- Error Message -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                      IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                      Foreground="Red"
+                      TextWrapping="Wrap"/>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

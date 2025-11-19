@@ -1,0 +1,242 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:EvilModToolkit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="EvilModToolkit.Views.OverviewView"
+             x:DataType="vm:OverviewViewModel">
+
+    <Design.DataContext>
+        <vm:OverviewViewModel/>
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="20">
+            <!-- Header with Refresh Button -->
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                          Text="Overview"
+                          FontSize="24"
+                          FontWeight="Bold"
+                          VerticalAlignment="Center"/>
+                <Button Grid.Column="1"
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        Padding="20,5"/>
+            </Grid>
+
+            <!-- Game Information Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Fallout 4 Installation"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,10,0,0">
+                        <Grid.Styles>
+                            <Style Selector="TextBlock.Label">
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Margin" Value="0,0,15,5"/>
+                            </Style>
+                            <Style Selector="TextBlock.Value">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                            </Style>
+                        </Grid.Styles>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
+                                  Text="{Binding IsGameDetected, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Installed|Not Detected'}"
+                                  Foreground="{Binding IsGameDetected, Converter={StaticResource BoolToColorConverter}}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Install Path:"
+                                  IsVisible="{Binding IsGameDetected}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
+                                  Text="{Binding GameInfo.InstallPath}"
+                                  IsVisible="{Binding IsGameDetected}"
+                                  TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="Version:"
+                                  IsVisible="{Binding IsGameDetected}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
+                                  Text="{Binding GameInfo.Version}"
+                                  IsVisible="{Binding IsGameDetected}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="Label" Text="Install Type:"
+                                  IsVisible="{Binding IsGameDetected}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Classes="Value"
+                                  Text="{Binding GameInfo.InstallType, Converter={StaticResource EnumToStringConverter}}"
+                                  IsVisible="{Binding IsGameDetected}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- F4SE Information Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="F4SE (Fallout 4 Script Extender)"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,10,0,0">
+                        <Grid.Styles>
+                            <Style Selector="TextBlock.Label">
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Margin" Value="0,0,15,5"/>
+                            </Style>
+                            <Style Selector="TextBlock.Value">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                            </Style>
+                        </Grid.Styles>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
+                                  Text="{Binding IsF4SeInstalled, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Installed|Not Installed'}"
+                                  Foreground="{Binding IsF4SeInstalled, Converter={StaticResource BoolToColorConverter}}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Version:"
+                                  IsVisible="{Binding IsF4SeInstalled}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
+                                  Text="{Binding F4SeVersion}"
+                                  IsVisible="{Binding IsF4SeInstalled}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Mod Manager Information Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Mod Manager"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,10,0,0">
+                        <Grid.Styles>
+                            <Style Selector="TextBlock.Label">
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Margin" Value="0,0,15,5"/>
+                            </Style>
+                            <Style Selector="TextBlock.Value">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                            </Style>
+                        </Grid.Styles>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
+                                  Text="{Binding IsModManagerDetected, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Detected|Not Detected'}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Type:"
+                                  IsVisible="{Binding IsModManagerDetected}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
+                                  Text="{Binding ModManagerInfo.Type, Converter={StaticResource EnumToStringConverter}}"
+                                  IsVisible="{Binding IsModManagerDetected}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="Version:"
+                                  IsVisible="{Binding IsModManagerDetected}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
+                                  Text="{Binding ModManagerInfo.Version}"
+                                  IsVisible="{Binding IsModManagerDetected}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- System Information Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5"
+                    IsVisible="{Binding SystemInfo, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="System Information"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,10,0,0">
+                        <Grid.Styles>
+                            <Style Selector="TextBlock.Label">
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Margin" Value="0,0,15,5"/>
+                            </Style>
+                            <Style Selector="TextBlock.Value">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                            </Style>
+                        </Grid.Styles>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Operating System:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
+                                  Text="{Binding SystemInfo.OperatingSystem}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="RAM:"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
+                                  Text="{Binding SystemInfo.TotalRamGb, StringFormat='{}{0:F1} GB'}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="CPU:"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
+                                  Text="{Binding SystemInfo.CpuName}"
+                                  TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="Label" Text="GPU:"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Classes="Value"
+                                  Text="{Binding SystemInfo.GpuName}"
+                                  TextWrapping="Wrap"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Problems Section -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    Padding="15"
+                    CornerRadius="5"
+                    IsVisible="{Binding Problems.Count, Converter={StaticResource CountToVisibilityConverter}}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Issues Detected"
+                              FontSize="18"
+                              FontWeight="SemiBold"/>
+
+                    <ItemsControl ItemsSource="{Binding Problems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{Binding Severity, Converter={StaticResource SeverityToColorConverter}}"
+                                        BorderThickness="2"
+                                        Padding="10"
+                                        Margin="0,5"
+                                        CornerRadius="3">
+                                    <StackPanel Spacing="5">
+                                        <TextBlock Text="{Binding Summary}"
+                                                  FontWeight="SemiBold"
+                                                  TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Solution}"
+                                                  TextWrapping="Wrap"
+                                                  Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Status Message -->
+            <TextBlock Text="{Binding StatusMessage}"
+                      IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                      Foreground="{DynamicResource SystemAccentColor}"/>
+
+            <!-- Error Message -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                      IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                      Foreground="Red"
+                      TextWrapping="Wrap"/>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

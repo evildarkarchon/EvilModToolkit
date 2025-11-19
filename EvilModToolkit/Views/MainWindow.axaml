@@ -1,13 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:EvilModToolkit.ViewModels"
+        xmlns:views="using:EvilModToolkit.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="EvilModToolkit.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Evil Modding Toolkit">
+        Title="{Binding WindowTitle}"
+        Width="1000" Height="600"
+        MinWidth="800" MinHeight="500">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -15,6 +18,48 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <DockPanel>
+        <!-- Menu Bar -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" InputGesture="Alt+F4"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Status Bar -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                Padding="10,5">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0"
+                          Text="Ready"
+                          VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2"
+                          Text="v1.0.0"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content - Tab Control -->
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}"
+                    Margin="5">
+            <TabItem Header="Overview">
+                <views:OverviewView DataContext="{Binding OverviewViewModel}"/>
+            </TabItem>
+            <TabItem Header="F4SE Scanner">
+                <views:F4SEView DataContext="{Binding F4SEViewModel}"/>
+            </TabItem>
+            <TabItem Header="Tools">
+                <views:ToolsView DataContext="{Binding ToolsViewModel}"/>
+            </TabItem>
+            <TabItem Header="Settings">
+                <views:SettingsView DataContext="{Binding SettingsViewModel}"/>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 
 </Window>
