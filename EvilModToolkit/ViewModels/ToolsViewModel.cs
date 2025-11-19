@@ -110,16 +110,16 @@ namespace EvilModToolkit.ViewModels
         /// <returns>A task representing the async operation.</returns>
         private async Task PatchBA2Async()
         {
-            // Execute with error handling provided by ViewModelBase
-            if (!await TryExecuteAsync(async () =>
+            IsBusy = true;
+            try
             {
-                IsBusy = true;
-                SetStatus("Patching BA2 archive...");
-                _logger.LogInformation("Starting BA2 patch operation: {SourcePath} -> {TargetVersion}",
-                    SourceBA2Path, TargetVersion);
-
-                try
+                // Execute with error handling provided by ViewModelBase
+                if (!await TryExecuteAsync(async () =>
                 {
+                    SetStatus("Patching BA2 archive...");
+                    _logger.LogInformation("Starting BA2 patch operation: {SourcePath} -> {TargetVersion}",
+                        SourceBA2Path, TargetVersion);
+
                     // Validate input path
                     if (string.IsNullOrWhiteSpace(SourceBA2Path))
                     {
@@ -166,14 +166,14 @@ namespace EvilModToolkit.ViewModels
                     {
                         throw new InvalidOperationException("BA2 patching failed. See logs for details.");
                     }
-                }
-                finally
+                }, _logger))
                 {
-                    IsBusy = false;
+                    _logger.LogError("BA2 patch operation failed");
                 }
-            }, _logger))
+            }
+            finally
             {
-                _logger.LogError("BA2 patch operation failed");
+                IsBusy = false;
             }
         }
 
@@ -188,18 +188,18 @@ namespace EvilModToolkit.ViewModels
         /// <returns>A task representing the async operation.</returns>
         private async Task ApplyPatchAsync()
         {
-            // Execute with error handling and cancellation support provided by ViewModelBase
-            if (!await TryExecuteAsync(async () =>
+            IsBusy = true;
+            ProgressPercentage = 0;
+            CreateCancellationTokenSource(); // Create cancellation token for this operation
+            try
             {
-                IsBusy = true;
-                ProgressPercentage = 0;
-                CreateCancellationTokenSource(); // Create cancellation token for this operation
-                SetStatus("Applying xdelta patch...");
-                _logger.LogInformation("Starting xdelta patch operation: {SourceFile} + {PatchFile}",
-                    SourceFilePath, PatchFilePath);
-
-                try
+                // Execute with error handling and cancellation support provided by ViewModelBase
+                if (!await TryExecuteAsync(async () =>
                 {
+                    SetStatus("Applying xdelta patch...");
+                    _logger.LogInformation("Starting xdelta patch operation: {SourceFile} + {PatchFile}",
+                        SourceFilePath, PatchFilePath);
+
                     // Validate inputs
                     if (string.IsNullOrWhiteSpace(SourceFilePath))
                     {
@@ -322,16 +322,16 @@ namespace EvilModToolkit.ViewModels
                         }
                         throw;
                     }
-                }
-                finally
+                }, _logger))
                 {
-                    IsBusy = false;
-                    // Don't reset ProgressPercentage to 0 here - keep the final value (100 on success)
-                    // This allows UI to show completion status
+                    _logger.LogError("xdelta patch operation failed");
                 }
-            }, _logger))
+            }
+            finally
             {
-                _logger.LogError("xdelta patch operation failed");
+                IsBusy = false;
+                // Don't reset ProgressPercentage to 0 here - keep the final value (100 on success)
+                // This allows UI to show completion status
             }
         }
 
