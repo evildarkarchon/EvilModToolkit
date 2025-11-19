@@ -271,13 +271,14 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _gameDetectionService.DetectGame().Returns(gameInfo);
 
-                // Create the plugin directory but leave it empty
-                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>()).Returns(new List<F4SePluginInfo>());
 
+                // Create ViewModel BEFORE creating plugin directory to prevent constructor auto-scan
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // NOW create the plugin directory (after ViewModel creation to avoid auto-scan interference)
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
 
                 // Act
                 await viewModel.ScanPluginsCommand.Execute().FirstAsync();
@@ -361,10 +362,6 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _gameDetectionService.DetectGame().Returns(gameInfo);
 
-                // Create the plugin directory
-                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
                 var firstScanPlugins = new List<F4SePluginInfo>
                 {
                     new F4SePluginInfo
@@ -386,7 +383,12 @@ namespace EvilModToolkit.Tests.ViewModels
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>())
                     .Returns(firstScanPlugins, secondScanPlugins);
 
+                // Create ViewModel BEFORE creating plugin directory to prevent constructor auto-scan
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // NOW create the plugin directory (after ViewModel creation to avoid auto-scan interference)
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
 
                 // Act - First scan
                 await viewModel.ScanPluginsCommand.Execute().FirstAsync();
@@ -428,10 +430,6 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _gameDetectionService.DetectGame().Returns(gameInfo);
 
-                // Create the plugin directory
-                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
                 var plugins = new List<F4SePluginInfo>
                 {
                     new F4SePluginInfo { Compatibility = F4SeCompatibility.Universal },
@@ -444,7 +442,12 @@ namespace EvilModToolkit.Tests.ViewModels
 
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>()).Returns(plugins);
 
+                // Create ViewModel BEFORE creating plugin directory to prevent constructor auto-scan
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // NOW create the plugin directory (after ViewModel creation to avoid auto-scan interference)
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
 
                 // Act
                 await viewModel.ScanPluginsCommand.Execute().FirstAsync();
@@ -483,15 +486,16 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _gameDetectionService.DetectGame().Returns(gameInfo);
 
-                // Create the plugin directory
-                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
                 var taskCompletionSource = new TaskCompletionSource<List<F4SePluginInfo>>();
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>())
                     .Returns(callInfo => taskCompletionSource.Task.Result);
 
+                // Create ViewModel BEFORE creating plugin directory to prevent constructor auto-scan
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // NOW create the plugin directory (after ViewModel creation to avoid auto-scan interference)
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
 
                 // Act - Start command execution
                 var scanTask = viewModel.ScanPluginsCommand.Execute().FirstAsync();
@@ -535,17 +539,18 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _gameDetectionService.DetectGame().Returns(gameInfo);
 
-                // Create the plugin directory
-                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
                 var plugins = new List<F4SePluginInfo>
                 {
                     new F4SePluginInfo { Compatibility = F4SeCompatibility.Universal }
                 };
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>()).Returns(plugins);
 
+                // Create ViewModel BEFORE creating plugin directory to prevent constructor auto-scan
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // NOW create the plugin directory (after ViewModel creation to avoid auto-scan interference)
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
 
                 // Act
                 await viewModel.ScanPluginsCommand.Execute().FirstAsync();

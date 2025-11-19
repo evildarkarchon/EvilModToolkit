@@ -36,6 +36,7 @@ public class DependencyInjectionTests : IDisposable
         services.AddSingleton<IFileVersionService, FileVersionService>();
         services.AddSingleton<ISystemInfoService, SystemInfoService>();
         services.AddSingleton<IProcessService, ProcessService>();
+        services.AddSingleton<IDialogService, DialogService>();
 
         // Register Game Services (Scoped)
         services.AddScoped<IGameDetectionService, GameDetectionService>();
@@ -69,6 +70,7 @@ public class DependencyInjectionTests : IDisposable
         var fileVersionService = _serviceProvider.GetRequiredService<IFileVersionService>();
         var systemInfoService = _serviceProvider.GetRequiredService<ISystemInfoService>();
         var processService = _serviceProvider.GetRequiredService<IProcessService>();
+        var dialogService = _serviceProvider.GetRequiredService<IDialogService>();
         var gameDetectionService = _serviceProvider.GetRequiredService<IGameDetectionService>();
         var modManagerService = _serviceProvider.GetRequiredService<IModManagerService>();
         var f4sePluginService = _serviceProvider.GetRequiredService<IF4SEPluginService>();
@@ -80,6 +82,7 @@ public class DependencyInjectionTests : IDisposable
         fileVersionService.Should().NotBeNull();
         systemInfoService.Should().NotBeNull();
         processService.Should().NotBeNull();
+        dialogService.Should().NotBeNull();
         gameDetectionService.Should().NotBeNull();
         modManagerService.Should().NotBeNull();
         f4sePluginService.Should().NotBeNull();
@@ -101,6 +104,9 @@ public class DependencyInjectionTests : IDisposable
         var processService1 = _serviceProvider.GetRequiredService<IProcessService>();
         var processService2 = _serviceProvider.GetRequiredService<IProcessService>();
 
+        var dialogService1 = _serviceProvider.GetRequiredService<IDialogService>();
+        var dialogService2 = _serviceProvider.GetRequiredService<IDialogService>();
+
         var settingsService1 = _serviceProvider.GetRequiredService<ISettingsService>();
         var settingsService2 = _serviceProvider.GetRequiredService<ISettingsService>();
 
@@ -108,6 +114,7 @@ public class DependencyInjectionTests : IDisposable
         fileVersionService1.Should().BeSameAs(fileVersionService2);
         systemInfoService1.Should().BeSameAs(systemInfoService2);
         processService1.Should().BeSameAs(processService2);
+        dialogService1.Should().BeSameAs(dialogService2);
         settingsService1.Should().BeSameAs(settingsService2);
     }
 
