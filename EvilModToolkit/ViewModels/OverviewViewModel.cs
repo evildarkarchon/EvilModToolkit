@@ -38,12 +38,19 @@ namespace EvilModToolkit.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="OverviewViewModel"/> class.
         /// </summary>
+        /// <param name="gameDetectionService">The game detection service.</param>
+        /// <param name="modManagerService">The mod manager service.</param>
+        /// <param name="systemInfoService">The system info service.</param>
+        /// <param name="ba2ArchiveService">The BA2 archive service.</param>
+        /// <param name="logger">The logger.</param>
+        /// <param name="autoRefresh">Whether to automatically refresh on construction. Defaults to true.</param>
         public OverviewViewModel(
             IGameDetectionService gameDetectionService,
             IModManagerService modManagerService,
             ISystemInfoService systemInfoService,
             IBA2ArchiveService ba2ArchiveService,
-            ILogger<OverviewViewModel> logger)
+            ILogger<OverviewViewModel> logger,
+            bool autoRefresh = true)
         {
             _gameDetectionService = gameDetectionService ?? throw new ArgumentNullException(nameof(gameDetectionService));
             _modManagerService = modManagerService ?? throw new ArgumentNullException(nameof(modManagerService));
@@ -56,8 +63,11 @@ namespace EvilModToolkit.ViewModels
             // Create the refresh command
             RefreshCommand = ReactiveCommand.CreateFromTask(RefreshAsync);
 
-            // Perform initial refresh
-            _ = RefreshAsync();
+            // Perform initial refresh using the command if requested
+            if (autoRefresh)
+            {
+                _ = RefreshCommand.Execute().Subscribe();
+            }
         }
 
         #region Properties

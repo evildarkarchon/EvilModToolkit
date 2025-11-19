@@ -20,6 +20,7 @@ namespace EvilModToolkit.Tests.ViewModels
     /// Tests cover BA2 type detection (GNRL vs DX10), version detection (v1 vs v7/v8),
     /// error handling, and count aggregation logic.
     /// </summary>
+    [Collection("Sequential")]
     public class BA2ArchiveCountingTests : IDisposable
     {
         private readonly IGameDetectionService _gameDetectionService;
@@ -52,7 +53,30 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             if (Directory.Exists(_testDataPath))
             {
-                Directory.Delete(_testDataPath, recursive: true);
+                try
+                {
+                    // Force garbage collection to release any file handles
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+
+                    // Retry directory deletion up to 3 times
+                    for (int i = 0; i < 3; i++)
+                    {
+                        try
+                        {
+                            Directory.Delete(_testDataPath, recursive: true);
+                            break;
+                        }
+                        catch (IOException) when (i < 2)
+                        {
+                            System.Threading.Thread.Sleep(100);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Silently ignore cleanup failures
+                }
             }
         }
 
@@ -79,10 +103,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
-            // Act - Wait for refresh to complete
-            await Task.Delay(200);
+            // Act - Trigger refresh and wait for completion
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert - All counts should be zero
             viewModel.BA2CountGeneral.Should().Be(0, "no GNRL archives exist");
@@ -115,10 +140,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
-            // Act - Wait for refresh to complete
-            await Task.Delay(200);
+            // Act - Trigger refresh and wait for completion
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert - All counts should be zero, no exceptions thrown
             viewModel.BA2CountGeneral.Should().Be(0);
@@ -144,10 +170,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
-            // Act - Wait for refresh to complete
-            await Task.Delay(200);
+            // Act - Trigger refresh and wait for completion
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert - All counts should be zero, no exceptions thrown
             viewModel.BA2CountGeneral.Should().Be(0);
@@ -183,10 +210,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
-            // Act - Wait for refresh
-            await Task.Delay(200);
+            // Act - Trigger refresh and wait for completion
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountGeneral.Should().Be(3, "three GNRL archives exist");
@@ -218,10 +246,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountGeneral.Should().Be(0, "no GNRL archives exist");
@@ -255,10 +284,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountGeneral.Should().Be(10, "ten GNRL archives exist");
@@ -294,10 +324,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountV1.Should().Be(4, "four v1 archives exist");
@@ -330,10 +361,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountV1.Should().Be(0, "no v1 archives exist");
@@ -367,10 +399,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountV1.Should().Be(6, "six v1 archives exist");
@@ -417,10 +450,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountGeneral.Should().Be(1, "one valid GNRL archive");
@@ -459,10 +493,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountUnreadable.Should().Be(1, "archive with IsValid=false should count as unreadable");
@@ -500,10 +535,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountUnreadable.Should().Be(1, "archive with Unknown type should count as unreadable");
@@ -536,10 +572,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert - Should handle exception and count as unreadable
             viewModel.BA2CountUnreadable.Should().Be(1, "exception during GetArchiveInfo should count as unreadable");
@@ -575,10 +612,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountGeneral.Should().Be(150);
@@ -610,9 +648,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
-            await Task.Delay(200);
+            // Trigger initial refresh
+            await viewModel.RefreshCommand.Execute().FirstAsync();
             var initialTotal = viewModel.BA2CountTotal;
 
             // Act - Refresh with more archives
@@ -665,10 +705,11 @@ namespace EvilModToolkit.Tests.ViewModels
                 _modManagerService,
                 _systemInfoService,
                 _ba2ArchiveService,
-                _logger);
+                _logger,
+                autoRefresh: false);
 
             // Act
-            await Task.Delay(200);
+            await viewModel.RefreshCommand.Execute().FirstAsync();
 
             // Assert
             viewModel.BA2CountGeneral.Should().Be(80, "50 + 20 + 10 = 80 GNRL archives");
