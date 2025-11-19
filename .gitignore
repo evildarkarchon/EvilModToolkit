@@ -477,3 +477,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+.idea
