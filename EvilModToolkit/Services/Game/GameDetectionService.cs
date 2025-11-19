@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Platform;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ namespace EvilModToolkit.Services.Game;
 /// <summary>
 /// Service for detecting Fallout 4 installations via registry and file system.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class GameDetectionService : IGameDetectionService
 {
     private const string GameExecutable = "Fallout4.exe";

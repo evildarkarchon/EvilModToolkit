@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Game;
@@ -11,6 +12,7 @@ using NSubstitute;
 
 namespace EvilModToolkit.Tests.Services.Game;
 
+[SupportedOSPlatform("windows")]
 public class ModManagerServiceTests : IDisposable
 {
     private readonly ILogger<ModManagerService> _logger;

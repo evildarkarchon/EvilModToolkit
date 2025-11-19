@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- Treat platform-specific warnings as errors -->
+    <WarningsAsErrors>CA1416</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

@@ -14,6 +14,7 @@ namespace EvilModToolkit.Services.Game;
 /// <summary>
 /// Service for detecting and integrating with mod managers.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class ModManagerService : IModManagerService
 {
     private readonly ILogger<ModManagerService> _logger;
@@ -31,7 +32,6 @@ public class ModManagerService : IModManagerService
     }
 
     /// <inheritdoc />
-    [SupportedOSPlatform("windows")]
     public Task<ModManagerInfo> DetectModManagerAsync()
     {
         try
@@ -84,7 +84,6 @@ public class ModManagerService : IModManagerService
     }
 
     /// <inheritdoc />
-    [SupportedOSPlatform("windows")]
     public virtual string? FindMO2Installation()
     {
         try

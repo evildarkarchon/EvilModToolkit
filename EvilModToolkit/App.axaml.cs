@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Versioning;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -20,6 +21,7 @@ namespace EvilModToolkit
             AvaloniaXamlLoader.Load(this);
         }
 
+        [SupportedOSPlatform("windows")]
         public override void OnFrameworkInitializationCompleted()
         {
             // Configure services and logging
@@ -47,6 +49,7 @@ namespace EvilModToolkit
             base.OnFrameworkInitializationCompleted();
         }
 
+        [SupportedOSPlatform("windows")]
         private static ServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();

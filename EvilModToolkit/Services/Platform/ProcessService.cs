@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Runtime.Versioning;
 using EvilModToolkit.Models;
 using Microsoft.Extensions.Logging;
 
@@ -11,6 +12,7 @@ namespace EvilModToolkit.Services.Platform;
 /// <summary>
 /// Service for process detection and parent process navigation using WMI.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class ProcessService : IProcessService
 {
     private const int MaxProcessTreeDepth = 8;

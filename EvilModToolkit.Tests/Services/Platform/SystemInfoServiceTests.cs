@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using EvilModToolkit.Services.Platform;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -5,6 +6,7 @@ using NSubstitute;
 
 namespace EvilModToolkit.Tests.Services.Platform;
 
+[SupportedOSPlatform("windows")]
 public class SystemInfoServiceTests
 {
     private readonly ILogger<SystemInfoService> _logger;

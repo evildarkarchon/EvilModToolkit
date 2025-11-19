@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Platform;
 using FluentAssertions;
@@ -6,6 +7,7 @@ using NSubstitute;
 
 namespace EvilModToolkit.Tests.Services.Platform;
 
+[SupportedOSPlatform("windows")]
 public class ProcessServiceTests
 {
     private readonly ILogger<ProcessService> _logger;

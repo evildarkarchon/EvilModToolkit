@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Game;
 using EvilModToolkit.Services.Platform;
@@ -7,6 +8,7 @@ using NSubstitute;
 
 namespace EvilModToolkit.Tests.Services.Game;
 
+[SupportedOSPlatform("windows")]
 public class GameDetectionServiceTests
 {
     private readonly ILogger<GameDetectionService> _logger;

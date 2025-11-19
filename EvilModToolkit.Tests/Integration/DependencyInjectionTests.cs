@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using EvilModToolkit.Services.Analysis;
 using EvilModToolkit.Services.Configuration;
 using EvilModToolkit.Services.Game;
@@ -13,6 +14,7 @@ namespace EvilModToolkit.Tests.Integration;
 /// <summary>
 /// Integration tests for the Dependency Injection container configuration.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class DependencyInjectionTests : IDisposable
 {
     private readonly ServiceProvider _serviceProvider;

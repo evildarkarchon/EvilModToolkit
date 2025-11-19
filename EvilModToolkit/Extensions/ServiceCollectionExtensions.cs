@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using EvilModToolkit.Services.Analysis;
 using EvilModToolkit.Services.Configuration;
 using EvilModToolkit.Services.Game;
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds all application services to the service collection.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public static IServiceCollection AddEvilModToolkitServices(this IServiceCollection services)
     {
         services.AddLoggingServices();
@@ -52,6 +54,7 @@ public static class ServiceCollectionExtensions
     /// Registers platform-level services (Singleton - system utilities).
     /// These services provide OS-level functionality and are shared across the application.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     private static IServiceCollection AddPlatformServices(this IServiceCollection services)
     {
         services.AddSingleton<IFileVersionService, FileVersionService>();
@@ -65,6 +68,7 @@ public static class ServiceCollectionExtensions
     /// Registers game detection and mod manager services (Scoped - per-operation state).
     /// These services maintain state during game/mod manager detection operations.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     private static IServiceCollection AddGameServices(this IServiceCollection services)
     {
         services.AddScoped<IGameDetectionService, GameDetectionService>();
@@ -114,10 +118,10 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddViewModels(this IServiceCollection services)
     {
         services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<OverviewViewModel>();
+        services.AddTransient<F4SEViewModel>();
 
         // TODO: Add other ViewModels as they are created in Phase 4:
-        // services.AddTransient<OverviewViewModel>();
-        // services.AddTransient<F4SEViewModel>();
         // services.AddTransient<ScannerViewModel>();
         // services.AddTransient<ToolsViewModel>();
         // services.AddTransient<SettingsViewModel>();
