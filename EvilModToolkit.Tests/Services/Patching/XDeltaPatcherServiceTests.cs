@@ -186,26 +186,28 @@ public class XDeltaPatcherServiceTests : IDisposable
     {
         // Arrange
         var currentDir = Directory.GetCurrentDirectory();
-        var xdeltaPath = Path.Combine(currentDir, "xdelta3.exe");
-        var existsBefore = File.Exists(xdeltaPath);
+        var appDir = AppDomain.CurrentDomain.BaseDirectory;
+        var currentDirXdelta = Path.Combine(currentDir, "xdelta3.exe");
+        var appDirXdelta = Path.Combine(appDir, "xdelta3.exe");
 
-        try
+        // Check if current dir and app dir are the same
+        var sameDirectory = string.Equals(
+            Path.GetFullPath(currentDir),
+            Path.GetFullPath(appDir),
+            StringComparison.OrdinalIgnoreCase);
+
+        if (sameDirectory)
         {
-            if (!existsBefore)
-            {
-                File.WriteAllText(xdeltaPath, "dummy");
-            }
-
-            // Clear app directory to force check of current directory
-            var appDirXdelta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "xdelta3.exe");
-            var appDirExisted = File.Exists(appDirXdelta);
-            if (appDirExisted)
-            {
-                File.Move(appDirXdelta, appDirXdelta + ".bak");
-            }
-
+            // If they're the same, this test is redundant with GetXDelta3Path_WhenXDeltaExistsInAppDirectory_ReturnsPath
+            // Just verify the file exists in that location
+            var existsBefore = File.Exists(currentDirXdelta);
             try
             {
+                if (!existsBefore)
+                {
+                    File.WriteAllText(currentDirXdelta, "dummy");
+                }
+
                 // Act
                 var result = _sut.GetXDelta3Path();
 
@@ -215,17 +217,52 @@ public class XDeltaPatcherServiceTests : IDisposable
             }
             finally
             {
-                if (appDirExisted)
+                if (!existsBefore && File.Exists(currentDirXdelta))
                 {
-                    File.Move(appDirXdelta + ".bak", appDirXdelta);
+                    File.Delete(currentDirXdelta);
                 }
             }
         }
-        finally
+        else
         {
-            if (!existsBefore && File.Exists(xdeltaPath))
+            // Different directories - test current directory fallback
+            var currentDirExistedBefore = File.Exists(currentDirXdelta);
+            var appDirExistedBefore = File.Exists(appDirXdelta);
+
+            try
             {
-                File.Delete(xdeltaPath);
+                // Ensure file doesn't exist in app directory
+                if (appDirExistedBefore)
+                {
+                    File.Move(appDirXdelta, appDirXdelta + ".bak");
+                }
+
+                // Create file in current directory
+                if (!currentDirExistedBefore)
+                {
+                    File.WriteAllText(currentDirXdelta, "dummy");
+                }
+
+                // Act
+                var result = _sut.GetXDelta3Path();
+
+                // Assert
+                result.Should().NotBeNull();
+                result.Should().EndWithEquivalentOf("xdelta3.exe");
+            }
+            finally
+            {
+                // Restore app directory file
+                if (appDirExistedBefore && File.Exists(appDirXdelta + ".bak"))
+                {
+                    File.Move(appDirXdelta + ".bak", appDirXdelta);
+                }
+
+                // Clean up current directory file
+                if (!currentDirExistedBefore && File.Exists(currentDirXdelta))
+                {
+                    File.Delete(currentDirXdelta);
+                }
             }
         }
     }

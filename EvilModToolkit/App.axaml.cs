@@ -2,11 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using EvilModToolkit.Services.Analysis;
-using EvilModToolkit.Services.Configuration;
-using EvilModToolkit.Services.Game;
-using EvilModToolkit.Services.Patching;
-using EvilModToolkit.Services.Platform;
+using EvilModToolkit.Extensions;
 using EvilModToolkit.ViewModels;
 using EvilModToolkit.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,9 +10,10 @@ using Microsoft.Extensions.Logging;
 
 namespace EvilModToolkit
 {
-    public partial class App : Application
+    public partial class App : Application, IDisposable
     {
-        private IServiceProvider? _serviceProvider;
+        private ServiceProvider? _serviceProvider;
+        private bool _disposed;
 
         public override void Initialize()
         {
@@ -33,9 +30,17 @@ namespace EvilModToolkit
                 var logger = _serviceProvider.GetRequiredService<ILogger<App>>();
                 logger.LogInformation("Evil Modding Toolkit starting...");
 
+                // Resolve MainWindowViewModel from DI instead of using 'new'
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = _serviceProvider.GetRequiredService<MainWindowViewModel>()
+                };
+
+                // Wire up application shutdown for proper disposal
+                desktop.ShutdownRequested += (_, _) =>
+                {
+                    logger.LogInformation("Evil Modding Toolkit shutting down...");
+                    Dispose();
                 };
             }
 
@@ -46,37 +51,23 @@ namespace EvilModToolkit
         {
             var services = new ServiceCollection();
 
-            // Configure logging
-            services.AddLogging(builder =>
-            {
-                builder.SetMinimumLevel(LogLevel.Debug);
-                builder.AddConsole();
-                builder.AddDebug();
-
-                // TODO: Add file logging provider in future
-                // builder.AddFile("logs/EvilModToolkit-{Date}.log");
-            });
-
-            // Register Platform Services (Singleton - system-level utilities)
-            services.AddSingleton<IFileVersionService, FileVersionService>();
-            services.AddSingleton<ISystemInfoService, SystemInfoService>();
-            services.AddSingleton<IProcessService, ProcessService>();
-
-            // Register Game Services (Scoped - per-operation state)
-            services.AddScoped<IGameDetectionService, GameDetectionService>();
-            services.AddScoped<IModManagerService, ModManagerService>();
-
-            // Register Analysis Services (Transient - per-file analysis)
-            services.AddTransient<IF4SEPluginService, F4SePluginService>();
-
-            // Register Patching Services (Transient - per-operation)
-            services.AddTransient<IBA2ArchiveService, BA2ArchiveService>();
-            services.AddTransient<IXDeltaPatcherService, XDeltaPatcherService>();
-
-            // Register Configuration Services (Singleton - app-wide settings)
-            services.AddSingleton<ISettingsService, SettingsService>();
+            // Register all application services using extension method
+            services.AddEvilModToolkitServices();
 
             return services.BuildServiceProvider();
+        }
+
+        /// <summary>
+        /// Disposes of resources used by the application.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _serviceProvider?.Dispose();
+            _disposed = true;
+            GC.SuppressFinalize(this);
         }
     }
 }
