@@ -67,7 +67,7 @@ namespace EvilModToolkit
             services.AddScoped<IModManagerService, ModManagerService>();
 
             // Register Analysis Services (Transient - per-file analysis)
-            services.AddTransient<IF4SEPluginService, F4SEPluginService>();
+            services.AddTransient<IF4SEPluginService, F4SePluginService>();
 
             // Register Patching Services (Transient - per-operation)
             services.AddTransient<IBA2ArchiveService, BA2ArchiveService>();

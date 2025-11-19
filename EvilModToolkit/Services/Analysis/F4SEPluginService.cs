@@ -12,23 +12,23 @@ namespace EvilModToolkit.Services.Analysis;
 /// <summary>
 /// Service for analyzing F4SE plugin DLLs using PeNet for PE export table parsing.
 /// </summary>
-public class F4SEPluginService : IF4SEPluginService
+public class F4SePluginService : IF4SEPluginService
 {
-    private const string F4SEPluginLoadExport = "F4SEPlugin_Load";
-    private const string F4SEPluginQueryExport = "F4SEPlugin_Query";
-    private const string F4SEPluginVersionExport = "F4SEPlugin_Version";
+    private const string F4SePluginLoadExport = "F4SEPlugin_Load";
+    private const string F4SePluginQueryExport = "F4SEPlugin_Query";
+    private const string F4SePluginVersionExport = "F4SEPlugin_Version";
 
-    private readonly ILogger<F4SEPluginService> _logger;
+    private readonly ILogger<F4SePluginService> _logger;
     private readonly IFileVersionService _fileVersionService;
 
-    public F4SEPluginService(ILogger<F4SEPluginService> logger, IFileVersionService fileVersionService)
+    public F4SePluginService(ILogger<F4SePluginService> logger, IFileVersionService fileVersionService)
     {
         _logger = logger;
         _fileVersionService = fileVersionService;
     }
 
     /// <inheritdoc />
-    public F4SEPluginInfo? AnalyzePlugin(string filePath)
+    public F4SePluginInfo? AnalyzePlugin(string filePath)
     {
         try
         {
@@ -52,31 +52,31 @@ public class F4SEPluginService : IF4SEPluginService
             if (exports == null || !exports.Any())
             {
                 _logger.LogDebug("No exports found in DLL: {FilePath}", filePath);
-                return CreateNonF4SEPluginInfo(filePath);
+                return CreateNonF4SePluginInfo(filePath);
             }
 
             var exportNames = exports.Select(e => e.Name).Where(name => !string.IsNullOrEmpty(name)).ToList();
 
-            var isF4SEPlugin = exportNames.Contains(F4SEPluginLoadExport);
-            var supportsOG = exportNames.Contains(F4SEPluginQueryExport);
-            var supportsNG = exportNames.Contains(F4SEPluginVersionExport);
+            var isF4SePlugin = exportNames.Contains(F4SePluginLoadExport);
+            var supportsOg = exportNames.Contains(F4SePluginQueryExport);
+            var supportsNg = exportNames.Contains(F4SePluginVersionExport);
 
-            var compatibility = DetermineCompatibility(isF4SEPlugin, supportsOG, supportsNG);
+            var compatibility = DetermineCompatibility(isF4SePlugin, supportsOg, supportsNg);
 
             var version = _fileVersionService.GetFileVersion(filePath)?.Version;
 
-            var pluginInfo = new F4SEPluginInfo
+            var pluginInfo = new F4SePluginInfo
             {
                 FileName = Path.GetFileName(filePath),
                 FilePath = filePath,
-                IsF4SEPlugin = isF4SEPlugin,
-                SupportsOG = supportsOG,
-                SupportsNG = supportsNG,
+                IsF4SePlugin = isF4SePlugin,
+                SupportsOg = supportsOg,
+                SupportsNg = supportsNg,
                 Compatibility = compatibility,
                 Version = version
             };
 
-            if (isF4SEPlugin)
+            if (isF4SePlugin)
             {
                 _logger.LogDebug("F4SE Plugin detected: {FileName}, Compatibility: {Compatibility}",
                     pluginInfo.FileName, compatibility);
@@ -92,9 +92,9 @@ public class F4SEPluginService : IF4SEPluginService
     }
 
     /// <inheritdoc />
-    public List<F4SEPluginInfo> ScanDirectory(string directoryPath, bool recursive = false)
+    public List<F4SePluginInfo> ScanDirectory(string directoryPath, bool recursive = false)
     {
-        var plugins = new List<F4SEPluginInfo>();
+        var plugins = new List<F4SePluginInfo>();
 
         try
         {
@@ -118,9 +118,9 @@ public class F4SEPluginService : IF4SEPluginService
                 }
             }
 
-            var f4sePluginCount = plugins.Count(p => p.IsF4SEPlugin);
+            var f4SePluginCount = plugins.Count(p => p.IsF4SePlugin);
             _logger.LogInformation("Found {F4SECount} F4SE plugins out of {TotalCount} DLLs",
-                f4sePluginCount, plugins.Count);
+                f4SePluginCount, plugins.Count);
         }
         catch (Exception ex)
         {
@@ -130,34 +130,34 @@ public class F4SEPluginService : IF4SEPluginService
         return plugins;
     }
 
-    private F4SEPluginInfo CreateNonF4SEPluginInfo(string filePath)
+    private F4SePluginInfo CreateNonF4SePluginInfo(string filePath)
     {
-        return new F4SEPluginInfo
+        return new F4SePluginInfo
         {
             FileName = Path.GetFileName(filePath),
             FilePath = filePath,
-            IsF4SEPlugin = false,
-            SupportsOG = false,
-            SupportsNG = false,
-            Compatibility = F4SECompatibility.NotF4SEPlugin,
+            IsF4SePlugin = false,
+            SupportsOg = false,
+            SupportsNg = false,
+            Compatibility = F4SeCompatibility.NotF4SePlugin,
             Version = _fileVersionService.GetFileVersion(filePath)?.Version
         };
     }
 
-    private F4SECompatibility DetermineCompatibility(bool isF4SEPlugin, bool supportsOG, bool supportsNG)
+    private F4SeCompatibility DetermineCompatibility(bool isF4SePlugin, bool supportsOg, bool supportsNg)
     {
-        if (!isF4SEPlugin)
-            return F4SECompatibility.NotF4SEPlugin;
+        if (!isF4SePlugin)
+            return F4SeCompatibility.NotF4SePlugin;
 
-        if (supportsOG && supportsNG)
-            return F4SECompatibility.Universal;
+        if (supportsOg && supportsNg)
+            return F4SeCompatibility.Universal;
 
-        if (supportsOG)
-            return F4SECompatibility.OGOnly;
+        if (supportsOg)
+            return F4SeCompatibility.OgOnly;
 
-        if (supportsNG)
-            return F4SECompatibility.NGOnly;
+        if (supportsNg)
+            return F4SeCompatibility.NgOnly;
 
-        return F4SECompatibility.Unknown;
+        return F4SeCompatibility.Unknown;
     }
 }

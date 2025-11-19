@@ -7,17 +7,17 @@ using NSubstitute;
 
 namespace EvilModToolkit.Tests.Services.Analysis;
 
-public class F4SEPluginServiceTests
+public class F4SePluginServiceTests
 {
-    private readonly ILogger<F4SEPluginService> _logger;
+    private readonly ILogger<F4SePluginService> _logger;
     private readonly IFileVersionService _fileVersionService;
-    private readonly F4SEPluginService _sut;
+    private readonly F4SePluginService _sut;
 
-    public F4SEPluginServiceTests()
+    public F4SePluginServiceTests()
     {
-        _logger = Substitute.For<ILogger<F4SEPluginService>>();
+        _logger = Substitute.For<ILogger<F4SePluginService>>();
         _fileVersionService = Substitute.For<IFileVersionService>();
-        _sut = new F4SEPluginService(_logger, _fileVersionService);
+        _sut = new F4SePluginService(_logger, _fileVersionService);
     }
 
     [Fact]
@@ -66,10 +66,10 @@ public class F4SEPluginServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.IsF4SEPlugin.Should().BeFalse();
-        result.Compatibility.Should().Be(F4SECompatibility.NotF4SEPlugin);
-        result.SupportsOG.Should().BeFalse();
-        result.SupportsNG.Should().BeFalse();
+        result.IsF4SePlugin.Should().BeFalse();
+        result.Compatibility.Should().Be(F4SeCompatibility.NotF4SePlugin);
+        result.SupportsOg.Should().BeFalse();
+        result.SupportsNg.Should().BeFalse();
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class F4SEPluginServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.FileName.Should().Be("kernel32.dll");
+        result.FileName.Should().Be("kernel32.dll");
         result.FilePath.Should().Be(systemDll);
     }
 

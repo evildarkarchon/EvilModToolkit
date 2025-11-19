@@ -13,7 +13,7 @@ public interface IF4SEPluginService
     /// </summary>
     /// <param name="filePath">Path to the DLL file.</param>
     /// <returns>Plugin information, or null if the file is invalid or not a DLL.</returns>
-    F4SEPluginInfo? AnalyzePlugin(string filePath);
+    F4SePluginInfo? AnalyzePlugin(string filePath);
 
     /// <summary>
     /// Scans a directory for F4SE plugins.
@@ -21,5 +21,5 @@ public interface IF4SEPluginService
     /// <param name="directoryPath">Path to the directory to scan (typically Data/F4SE/Plugins).</param>
     /// <param name="recursive">Whether to search subdirectories.</param>
     /// <returns>List of F4SE plugin information.</returns>
-    List<F4SEPluginInfo> ScanDirectory(string directoryPath, bool recursive = false);
+    List<F4SePluginInfo> ScanDirectory(string directoryPath, bool recursive = false);
 }

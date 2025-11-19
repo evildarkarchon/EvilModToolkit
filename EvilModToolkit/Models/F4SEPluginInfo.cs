@@ -3,7 +3,7 @@ namespace EvilModToolkit.Models;
 /// <summary>
 /// Represents information about an F4SE plugin DLL.
 /// </summary>
-public class F4SEPluginInfo
+public class F4SePluginInfo
 {
     /// <summary>
     /// Gets the file name of the plugin.
@@ -18,22 +18,22 @@ public class F4SEPluginInfo
     /// <summary>
     /// Gets a value indicating whether this is an F4SE plugin (exports F4SEPlugin_Load).
     /// </summary>
-    public bool IsF4SEPlugin { get; init; }
+    public bool IsF4SePlugin { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this plugin supports Original Game (exports F4SEPlugin_Query).
     /// </summary>
-    public bool SupportsOG { get; init; }
+    public bool SupportsOg { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this plugin supports Next Gen (exports F4SEPlugin_Version).
     /// </summary>
-    public bool SupportsNG { get; init; }
+    public bool SupportsNg { get; init; }
 
     /// <summary>
     /// Gets the compatibility status of the plugin.
     /// </summary>
-    public F4SECompatibility Compatibility { get; init; }
+    public F4SeCompatibility Compatibility { get; init; }
 
     /// <summary>
     /// Gets the file version if available.
@@ -44,12 +44,12 @@ public class F4SEPluginInfo
 /// <summary>
 /// Represents the F4SE compatibility status of a plugin.
 /// </summary>
-public enum F4SECompatibility
+public enum F4SeCompatibility
 {
     /// <summary>
     /// Not an F4SE plugin.
     /// </summary>
-    NotF4SEPlugin,
+    NotF4SePlugin,
 
     /// <summary>
     /// Supports both Original Game and Next Gen.
@@ -59,12 +59,12 @@ public enum F4SECompatibility
     /// <summary>
     /// Only supports Original Game (pre-NG).
     /// </summary>
-    OGOnly,
+    OgOnly,
 
     /// <summary>
     /// Only supports Next Gen.
     /// </summary>
-    NGOnly,
+    NgOnly,
 
     /// <summary>
     /// F4SE plugin but compatibility cannot be determined.
