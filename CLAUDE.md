@@ -170,6 +170,99 @@ public MyViewModel(IScannerService scannerService)
 }
 ```
 
+## Trimming and AOT Compatibility
+
+**REQUIREMENT**: This project must be trim-friendly to enable publishing standalone executables without bundling the entire .NET runtime.
+
+### ViewLocator Pattern
+
+**CRITICAL**: The ViewLocator **must** use the switch-based pattern, not reflection-based discovery.
+
+```csharp
+// REQUIRED - Trim-friendly switch pattern
+public Control? Build(object? data)
+{
+    return data switch
+    {
+        MainWindowViewModel vm => new MainWindow { DataContext = vm },
+        OverviewViewModel vm => new OverviewView { DataContext = vm },
+        // Add each ViewModel-to-View mapping explicitly
+        _ => new TextBlock { Text = $"View not found for {data.GetType().Name}" }
+    };
+}
+```
+
+**WHY**: Reflection-based patterns (`Type.GetType()`, `Activator.CreateInstance()`) prevent the trimmer from knowing which types are actually used, forcing inclusion of the entire runtime.
+
+**WHEN ADDING NEW VIEWS**: Always add the corresponding ViewModel-to-View mapping to the switch statement in `ViewLocator.cs`.
+
+### Compiled Bindings
+
+**REQUIREMENT**: Use compiled bindings in all XAML views (already enabled globally in `.csproj`).
+
+```xml
+<UserControl xmlns:vm="using:EvilModToolkit.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             x:CompileBindings="True">
+    <TextBlock Text="{Binding GameVersion}" />
+</UserControl>
+```
+
+The project has `<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>` enabled, so this is automatic for most bindings.
+
+### Publishing Configuration
+
+The project is configured for trimmed publishing. Use these commands:
+
+```bash
+# Publish self-contained with trimming (Windows x64)
+dotnet publish -c Release -r win-x64 --self-contained /p:PublishTrimmed=true
+
+# Publish framework-dependent (requires .NET runtime installed)
+dotnet publish -c Release -r win-x64 --self-contained false
+
+# Test trimming without full publish
+dotnet build -c Release /p:PublishTrimmed=true
+```
+
+### Trim-Friendly Patterns
+
+**DO**:
+- ✅ Use explicit switch-based ViewLocator
+- ✅ Use compiled bindings (`x:CompileBindings="True"`)
+- ✅ Register services explicitly in DI container
+- ✅ Use `typeof(T)` instead of `Type.GetType(string)`
+- ✅ Avoid dynamic type loading or runtime assembly scanning
+
+**DON'T**:
+- ❌ Use reflection-based ViewLocator patterns
+- ❌ Use `Activator.CreateInstance()` with dynamic types
+- ❌ Use runtime XAML loading with dynamic types
+- ❌ Use `Type.GetType(string)` with string type names
+- ❌ Rely on assembly scanning or convention-based discovery
+
+### ReactiveUI and Trimming
+
+ReactiveUI produces trim warnings due to internal reflection usage (Splat, etc.). This is acceptable for our use case because:
+- ReactiveUI's core features work correctly with trimming
+- We mitigate issues by using explicit service registration
+- ViewModels don't rely on runtime type discovery
+
+**IMPORTANT**: If using ReactiveUI's dependency injection (Splat), register services explicitly rather than relying on auto-discovery.
+
+### Verification
+
+To verify trim-compatibility during development:
+
+```bash
+# Build with trim warnings visible
+dotnet build -c Release /p:PublishTrimmed=true /p:SuppressTrimAnalysisWarnings=false
+
+# Check for trim warnings in output
+# Acceptable: ReactiveUI internal warnings
+# NOT acceptable: Warnings from EvilModToolkit code
+```
+
 ## Porting Guidelines
 
 ### Python to C# Translation Notes

@@ -7,6 +7,14 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# Test data - Ignore proprietary test files but keep directory structure
+test_data/**/*
+!test_data/**/
+!test_data/**/.gitkeep
+
+# Don't bundle xdelta3 in source.
+xdelta3.exe
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

@@ -26,7 +26,25 @@ The goal is to port all features from the original toolkit:
 - **Language**: C# (.NET 8+)
 - **UI Framework**: Avalonia UI 11.x
 - **Architecture**: MVVM (Model-View-ViewModel)
+- **MVVM Framework**: ReactiveUI
+- **Dependency Injection**: Microsoft.Extensions.DependencyInjection
+- **Logging**: Microsoft.Extensions.Logging
+- **Testing**: xUnit, FluentAssertions, NSubstitute
 - **Platform**: Windows (primary), with potential for Linux/macOS support
+
+### Architecture Principles
+
+This project follows strict MVVM architecture with ReactiveUI:
+
+- **Models**: Plain C# classes representing domain entities
+- **ViewModels**: ReactiveUI `ReactiveObject` classes managing UI state and commands
+- **Views**: Avalonia XAML files with minimal code-behind
+- **Services**: Dependency-injected services for business logic
+- **Trim-Friendly**: Built for trimmed publishing (self-contained executables)
+- **Compiled Bindings**: All XAML bindings use compiled mode for performance
+- **Async/Await**: All long-running operations are asynchronous
+
+See [CLAUDE.md](CLAUDE.md) for detailed development guidelines and architecture decisions.
 
 ### Project Structure
 
@@ -45,9 +63,18 @@ EvilModToolkit/
 
 ## Development Status
 
-🚧 **Currently in initial development phase** 🚧
+🚧 **Currently in Phase 0 - Project Foundation** 🚧
 
 This project is actively being ported from Python to C#. Reference the original source in the `Code_to_Port/` directory for implementation details.
+
+**Current Progress:**
+- ✅ Project structure and Avalonia setup
+- ✅ Testing infrastructure (xUnit, FluentAssertions, NSubstitute)
+- ✅ WMI functionality tested
+- ✅ PeNet library tested for F4SE DLL parsing
+- ⏳ Core services layer (next phase)
+
+See [ROADMAP.md](ROADMAP.md) for detailed development plans and progress tracking.
 
 ## Building and Running
 
@@ -68,6 +95,30 @@ dotnet build
 
 # Run the application
 dotnet run --project EvilModToolkit
+
+# Run tests
+dotnet test
+
+# Run tests with coverage
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### Testing
+
+The project uses xUnit for testing with the following tools:
+
+- **xUnit**: Test framework
+- **FluentAssertions**: Readable assertion syntax
+- **NSubstitute**: Mocking framework
+- **coverlet.collector**: Code coverage
+
+Tests are organized in the `EvilModToolkit.Tests` project, mirroring the main project structure:
+
+```
+EvilModToolkit.Tests/
+├── Services/        # Service layer tests
+├── ViewModels/      # ViewModel tests
+└── Models/          # Model tests
 ```
 
 ## Installation (Future)

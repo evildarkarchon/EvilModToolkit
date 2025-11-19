@@ -1,0 +1,2 @@
+# This file ensures the BA2s directory is tracked by Git
+# All other files in this directory are ignored per .gitignore
