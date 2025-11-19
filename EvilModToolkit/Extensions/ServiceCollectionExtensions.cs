@@ -60,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IFileVersionService, FileVersionService>();
         services.AddSingleton<ISystemInfoService, SystemInfoService>();
         services.AddSingleton<IProcessService, ProcessService>();
+        services.AddSingleton<IDialogService, DialogService>();
 
         return services;
     }

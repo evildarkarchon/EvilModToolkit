@@ -19,6 +19,7 @@
         <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
         <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
         <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+        <converters:BA2ArchiveCountToColorConverter x:Key="BA2ArchiveCountToColorConverter"/>
     </Application.Resources>
 
     <Application.Styles>

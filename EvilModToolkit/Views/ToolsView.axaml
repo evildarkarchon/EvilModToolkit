@@ -69,33 +69,32 @@
                     <TextBlock Text="Game File Patcher (XDelta)"
                               FontSize="18"
                               FontWeight="SemiBold"/>
-                    <TextBlock Text="Apply xdelta patches to game files for version downgrade/upgrade"
+                    <TextBlock Text="Apply xdelta patches to game files. The patch will be applied in-place with automatic backup creation."
                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                               TextWrapping="Wrap"/>
 
                     <!-- Source File -->
                     <StackPanel Spacing="5">
-                        <TextBlock Text="Source File:"/>
+                        <TextBlock Text="Source File to Patch:"/>
                         <TextBox Text="{Binding SourceFilePath}"
-                                Watermark="Select the source file to patch (e.g., Fallout4.exe)..."
+                                Watermark="Select the file to patch (e.g., Fallout4.exe)..."
                                 IsReadOnly="False"/>
                     </StackPanel>
 
                     <!-- Patch File -->
                     <StackPanel Spacing="5">
-                        <TextBlock Text="Patch File (.xdelta):"/>
+                        <TextBlock Text="Delta Patch File (.xdelta):"/>
                         <TextBox Text="{Binding PatchFilePath}"
                                 Watermark="Select the xdelta patch file..."
                                 IsReadOnly="False"/>
                     </StackPanel>
 
-                    <!-- Output File -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Output File:"/>
-                        <TextBox Text="{Binding OutputFilePath}"
-                                Watermark="Select where to save the patched file..."
-                                IsReadOnly="False"/>
-                    </StackPanel>
+                    <!-- Info about backup -->
+                    <TextBlock Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                              FontStyle="Italic"
+                              TextWrapping="Wrap">
+                        <Run Text="ℹ The original file will be backed up automatically (e.g., Fallout4_patchBackup.exe)"/>
+                    </TextBlock>
 
                     <!-- Apply Patch Button -->
                     <Button Content="Apply Patch"
@@ -146,9 +145,9 @@
                     <TextBlock TextWrapping="Wrap">
                         <Run Text="• BA2 Archive Patcher: Converts BA2 archives between format versions. Required when downgrading or upgrading game versions."/>
                         <LineBreak/><LineBreak/>
-                        <Run Text="• XDelta Patcher: Applies binary delta patches to game files. Used for version downgrade/upgrade operations."/>
+                        <Run Text="• XDelta Patcher: Applies binary delta patches to game files in-place. The original file is automatically backed up before patching."/>
                         <LineBreak/><LineBreak/>
-                        <Run Text="⚠ Warning: Always backup your files before patching!"/>
+                        <Run Text="⚠ Warning: Backup files are created automatically, but keep additional backups of critical files!"/>
                     </TextBlock>
                 </StackPanel>
             </Border>

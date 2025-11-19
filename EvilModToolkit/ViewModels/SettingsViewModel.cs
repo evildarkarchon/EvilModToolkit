@@ -1,5 +1,6 @@
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Configuration;
+using EvilModToolkit.Services.Platform;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using System;
@@ -15,6 +16,7 @@ namespace EvilModToolkit.ViewModels
     public class SettingsViewModel : ViewModelBase
     {
         private readonly ISettingsService _settingsService;
+        private readonly IDialogService _dialogService;
         private readonly ILogger<SettingsViewModel> _logger;
 
         // Backing fields for settings properties
@@ -39,9 +41,11 @@ namespace EvilModToolkit.ViewModels
         /// <exception cref="ArgumentNullException">Thrown when any required dependency is null.</exception>
         public SettingsViewModel(
             ISettingsService settingsService,
+            IDialogService dialogService,
             ILogger<SettingsViewModel> logger)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Initialize default values before loading from service
@@ -54,6 +58,13 @@ namespace EvilModToolkit.ViewModels
             // Create commands - SaveSettings is async, ResetDefaults is synchronous
             SaveSettingsCommand = ReactiveCommand.CreateFromTask(SaveSettingsAsync);
             ResetDefaultsCommand = ReactiveCommand.Create(ResetDefaults);
+
+            // Create browse commands for folder selection
+            BrowseGamePathCommand = ReactiveCommand.CreateFromTask(BrowseGamePathAsync);
+            BrowseMO2PathCommand = ReactiveCommand.CreateFromTask(BrowseMO2PathAsync);
+            BrowseVortexPathCommand = ReactiveCommand.CreateFromTask(BrowseVortexPathAsync);
+            BrowseF4SEScanDirectoryCommand = ReactiveCommand.CreateFromTask(BrowseF4SEScanDirectoryAsync);
+            BrowseBA2PatchDirectoryCommand = ReactiveCommand.CreateFromTask(BrowseBA2PatchDirectoryAsync);
 
             // Load settings asynchronously on construction
             _ = LoadSettingsAsync();
@@ -179,6 +190,31 @@ namespace EvilModToolkit.ViewModels
         /// Does not automatically save - user must click Save to persist changes.
         /// </summary>
         public ReactiveCommand<Unit, Unit> ResetDefaultsCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the game installation path.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseGamePathCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the MO2 installation path.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseMO2PathCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the Vortex installation path.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseVortexPathCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the F4SE scan directory.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseF4SEScanDirectoryCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the BA2 patch directory.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseBA2PatchDirectoryCommand { get; }
 
         #endregion
 
@@ -307,6 +343,86 @@ namespace EvilModToolkit.ViewModels
         }
 
         /// <summary>
+        /// Opens a folder browser dialog for selecting the game installation path.
+        /// </summary>
+        private async Task BrowseGamePathAsync()
+        {
+            var selectedPath = await _dialogService.ShowFolderPickerAsync(
+                "Select Fallout 4 Installation Directory",
+                GamePathOverride);
+
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                GamePathOverride = selectedPath;
+                _logger.LogInformation("Game path set to: {Path}", selectedPath);
+            }
+        }
+
+        /// <summary>
+        /// Opens a folder browser dialog for selecting the MO2 installation path.
+        /// </summary>
+        private async Task BrowseMO2PathAsync()
+        {
+            var selectedPath = await _dialogService.ShowFolderPickerAsync(
+                "Select Mod Organizer 2 Directory",
+                MO2PathOverride);
+
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                MO2PathOverride = selectedPath;
+                _logger.LogInformation("MO2 path set to: {Path}", selectedPath);
+            }
+        }
+
+        /// <summary>
+        /// Opens a folder browser dialog for selecting the Vortex installation path.
+        /// </summary>
+        private async Task BrowseVortexPathAsync()
+        {
+            var selectedPath = await _dialogService.ShowFolderPickerAsync(
+                "Select Vortex Installation Directory",
+                VortexPathOverride);
+
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                VortexPathOverride = selectedPath;
+                _logger.LogInformation("Vortex path set to: {Path}", selectedPath);
+            }
+        }
+
+        /// <summary>
+        /// Opens a folder browser dialog for selecting the F4SE plugin scan directory.
+        /// </summary>
+        private async Task BrowseF4SEScanDirectoryAsync()
+        {
+            var selectedPath = await _dialogService.ShowFolderPickerAsync(
+                "Select F4SE Plugin Directory",
+                LastF4SEScanDirectory);
+
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                LastF4SEScanDirectory = selectedPath;
+                _logger.LogInformation("F4SE scan directory set to: {Path}", selectedPath);
+            }
+        }
+
+        /// <summary>
+        /// Opens a folder browser dialog for selecting the BA2 patch directory.
+        /// </summary>
+        private async Task BrowseBA2PatchDirectoryAsync()
+        {
+            var selectedPath = await _dialogService.ShowFolderPickerAsync(
+                "Select BA2 Archive Directory",
+                LastBA2PatchDirectory);
+
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                LastBA2PatchDirectory = selectedPath;
+                _logger.LogInformation("BA2 patch directory set to: {Path}", selectedPath);
+            }
+        }
+
+        /// <summary>
         /// Disposes resources used by the ViewModel.
         /// Ensures commands are properly disposed to prevent memory leaks.
         /// </summary>
@@ -318,6 +434,11 @@ namespace EvilModToolkit.ViewModels
                 // Dispose ReactiveCommand instances to clean up subscriptions
                 SaveSettingsCommand?.Dispose();
                 ResetDefaultsCommand?.Dispose();
+                BrowseGamePathCommand?.Dispose();
+                BrowseMO2PathCommand?.Dispose();
+                BrowseVortexPathCommand?.Dispose();
+                BrowseF4SEScanDirectoryCommand?.Dispose();
+                BrowseBA2PatchDirectoryCommand?.Dispose();
             }
 
             base.Dispose(disposing);

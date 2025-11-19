@@ -37,4 +37,13 @@ public interface IXDeltaPatcherService
     /// </summary>
     /// <returns>True if xdelta3.exe exists and is accessible, false otherwise.</returns>
     bool IsXDelta3Available();
+
+    /// <summary>
+    /// Validates that a patch can be applied to a source file.
+    /// Checks file existence, readability, and basic compatibility.
+    /// </summary>
+    /// <param name="sourceFilePath">Path to the source file.</param>
+    /// <param name="patchFilePath">Path to the xdelta patch file.</param>
+    /// <returns>A tuple indicating if validation passed and an error message if it failed.</returns>
+    Task<(bool IsValid, string? ErrorMessage)> ValidatePatchAsync(string sourceFilePath, string patchFilePath);
 }

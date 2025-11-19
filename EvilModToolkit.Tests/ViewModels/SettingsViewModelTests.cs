@@ -1,5 +1,6 @@
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Configuration;
+using EvilModToolkit.Services.Platform;
 using EvilModToolkit.ViewModels;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ namespace EvilModToolkit.Tests.ViewModels
     public class SettingsViewModelTests
     {
         private readonly ISettingsService _settingsService;
+        private readonly IDialogService _dialogService;
         private readonly ILogger<SettingsViewModel> _logger;
 
         /// <summary>
@@ -27,6 +29,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public SettingsViewModelTests()
         {
             _settingsService = Substitute.For<ISettingsService>();
+            _dialogService = Substitute.For<IDialogService>();
             _logger = Substitute.For<ILogger<SettingsViewModel>>();
         }
 
@@ -49,7 +52,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(testSettings));
 
             // Act
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
 
             // Wait for async initialization to complete
             await Task.Delay(100);
@@ -70,11 +73,25 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_ThrowsArgumentNullException_WhenSettingsServiceIsNull()
         {
             // Act
-            Action act = () => new SettingsViewModel(null!, _logger);
+            Action act = () => new SettingsViewModel(null!, _dialogService, _logger);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
                 .WithParameterName("settingsService");
+        }
+
+        /// <summary>
+        /// Verifies that the constructor throws ArgumentNullException when dialogService is null.
+        /// </summary>
+        [Fact]
+        public void Constructor_ThrowsArgumentNullException_WhenDialogServiceIsNull()
+        {
+            // Act
+            Action act = () => new SettingsViewModel(_settingsService, null!, _logger);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("dialogService");
         }
 
         /// <summary>
@@ -84,7 +101,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_ThrowsArgumentNullException_WhenLoggerIsNull()
         {
             // Act
-            Action act = () => new SettingsViewModel(_settingsService, null!);
+            Action act = () => new SettingsViewModel(_settingsService, _dialogService, null!);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
@@ -113,7 +130,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(testSettings));
 
             // Act
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
 
             // Wait for async loading
             await Task.Delay(100);
@@ -143,7 +160,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             var propertyChangedRaised = false;
@@ -169,7 +186,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -187,7 +204,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -211,7 +228,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -229,7 +246,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -256,7 +273,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
             _settingsService.SaveSettingsAsync(Arg.Any<AppSettings>()).Returns(Task.CompletedTask);
 
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Set valid settings
@@ -286,7 +303,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Set invalid window dimensions (too small)
@@ -317,7 +334,7 @@ namespace EvilModToolkit.Tests.ViewModels
                     await saveTaskSource.Task;
                 });
 
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act - Start save command
@@ -349,7 +366,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.SaveSettingsAsync(Arg.Any<AppSettings>())
                 .Returns(callInfo => throw new InvalidOperationException("Test save exception"));
 
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -393,7 +410,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(loadedSettings));
             _settingsService.GetDefaultSettings().Returns(defaultSettings);
 
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Verify loaded settings are applied
@@ -424,7 +441,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
             _settingsService.GetDefaultSettings().Returns(new AppSettings());
 
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -446,7 +463,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.When(x => x.GetDefaultSettings())
                 .Do(x => throw new InvalidOperationException("Test reset exception"));
 
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act
@@ -472,7 +489,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 .Returns<Task<AppSettings>>(x => throw new InvalidOperationException("Test load exception"));
 
             // Act
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(100);
 
             // Assert - should not crash, error should be set
@@ -492,7 +509,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
-            var viewModel = new SettingsViewModel(_settingsService, _logger);
+            var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);
 
             // Act

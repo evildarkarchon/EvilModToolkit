@@ -58,6 +58,12 @@ namespace EvilModToolkit.ViewModels
 
             // Detect game and plugin directory
             DetectPluginDirectory();
+
+            // Perform initial scan if plugin directory is valid
+            if (!string.IsNullOrEmpty(PluginDirectory) && System.IO.Directory.Exists(PluginDirectory))
+            {
+                _ = ScanPluginsAsync();
+            }
         }
 
         #region Properties
@@ -295,6 +301,9 @@ namespace EvilModToolkit.ViewModels
                     _filteredPlugins.Add(plugin);
                 }
             }
+
+            // Notify UI that the Plugins collection has changed
+            this.RaisePropertyChanged(nameof(Plugins));
 
             _logger.LogDebug("Applied filters: {FilteredCount}/{TotalCount} plugins visible",
                 _filteredPlugins.Count, _allPlugins.Count);

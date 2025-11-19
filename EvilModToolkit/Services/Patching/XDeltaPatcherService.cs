@@ -247,4 +247,98 @@ public class XDeltaPatcherService : IXDeltaPatcherService
         var path = GetXDelta3Path();
         return !string.IsNullOrEmpty(path);
     }
+
+    /// <inheritdoc />
+    public async Task<(bool IsValid, string? ErrorMessage)> ValidatePatchAsync(string sourceFilePath, string patchFilePath)
+    {
+        // Check if source file exists
+        if (!File.Exists(sourceFilePath))
+        {
+            return (false, $"Source file not found: {sourceFilePath}");
+        }
+
+        // Check if patch file exists
+        if (!File.Exists(patchFilePath))
+        {
+            return (false, $"Patch file not found: {patchFilePath}");
+        }
+
+        // Check if xdelta3 is available
+        if (!IsXDelta3Available())
+        {
+            return (false, "xdelta3.exe not found. Please ensure xdelta3.exe is in the application directory or PATH.");
+        }
+
+        // Check if source file is readable
+        try
+        {
+            await using var sourceStream = File.OpenRead(sourceFilePath);
+            // File is readable
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return (false, $"Access denied to source file: {sourceFilePath}");
+        }
+        catch (IOException ex)
+        {
+            return (false, $"Cannot read source file: {ex.Message}");
+        }
+
+        // Check if patch file is readable and appears to be a valid xdelta file
+        try
+        {
+            await using var patchStream = File.OpenRead(patchFilePath);
+
+            // Check for xdelta3 magic bytes (VCDIFF format)
+            // VCDIFF files start with magic bytes: 0xD6 0xC3 0xC4 (VCD in ASCII-ish)
+            var buffer = new byte[4];
+            var bytesRead = await patchStream.ReadAsync(buffer, 0, 4);
+
+            if (bytesRead < 4)
+            {
+                return (false, "Patch file is too small to be a valid xdelta patch.");
+            }
+
+            // Check for VCDIFF magic number
+            if (buffer[0] != 0xD6 || buffer[1] != 0xC3 || buffer[2] != 0xC4)
+            {
+                _logger.LogWarning("Patch file does not have VCDIFF magic bytes. First bytes: {Bytes}",
+                    BitConverter.ToString(buffer));
+                // Don't fail validation on this - xdelta3 might still be able to handle it
+                // but log a warning
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return (false, $"Access denied to patch file: {patchFilePath}");
+        }
+        catch (IOException ex)
+        {
+            return (false, $"Cannot read patch file: {ex.Message}");
+        }
+
+        // Check if there's enough disk space for the operation
+        try
+        {
+            var sourceFileInfo = new FileInfo(sourceFilePath);
+            var driveInfo = new DriveInfo(Path.GetPathRoot(sourceFilePath) ?? "C:\\");
+
+            // We need space for: backup file + temp patched file
+            // Estimate: 2x source file size (conservative estimate)
+            var requiredSpace = sourceFileInfo.Length * 2;
+
+            if (driveInfo.AvailableFreeSpace < requiredSpace)
+            {
+                return (false, $"Insufficient disk space. Required: {requiredSpace / (1024 * 1024)} MB, Available: {driveInfo.AvailableFreeSpace / (1024 * 1024)} MB");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not check disk space");
+            // Don't fail validation on disk space check failure
+        }
+
+        // All validation checks passed
+        return (true, null);
+    }
 }

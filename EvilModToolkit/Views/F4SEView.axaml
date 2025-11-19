@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:EvilModToolkit.ViewModels"
+             xmlns:models="using:EvilModToolkit.Models"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -108,36 +109,6 @@
             </Grid>
         </Border>
 
-        <!-- Plugin List -->
-        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                BorderThickness="1"
-                CornerRadius="5">
-            <DataGrid ItemsSource="{Binding Plugins}"
-                     SelectedItem="{Binding SelectedPlugin}"
-                     IsReadOnly="True"
-                     GridLinesVisibility="Horizontal"
-                     HeadersVisibility="Column"
-                     AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Plugin Name"
-                                       Binding="{Binding FileName}"
-                                       Width="2*"/>
-                    <DataGridTextColumn Header="Version"
-                                       Binding="{Binding Version}"
-                                       Width="*"/>
-                    <DataGridCheckBoxColumn Header="OG Support"
-                                           Binding="{Binding SupportsOg}"
-                                           Width="100"/>
-                    <DataGridCheckBoxColumn Header="NG Support"
-                                           Binding="{Binding SupportsNg}"
-                                           Width="100"/>
-                    <DataGridTextColumn Header="Compatibility"
-                                       Binding="{Binding Compatibility, Converter={StaticResource EnumToStringConverter}}"
-                                       Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
-
         <!-- Progress and Status -->
         <StackPanel DockPanel.Dock="Bottom" Margin="0,15,0,0" Spacing="10">
             <ProgressBar Value="{Binding ProgressPercentage}"
@@ -151,6 +122,46 @@
                       Foreground="Red"
                       TextWrapping="Wrap"/>
         </StackPanel>
+
+        <!-- Plugin List - fills remaining space -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Disabled"
+                     Margin="0,0,0,15">
+            <StackPanel>
+                <!-- Column Headers -->
+                <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                        BorderThickness="0,0,0,1"
+                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                        Padding="10,8">
+                    <Grid ColumnDefinitions="2*,*,100,100,*">
+                        <TextBlock Grid.Column="0" Text="Plugin Name" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="1" Text="Version" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="2" Text="OG Support" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="3" Text="NG Support" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="4" Text="Compatibility" FontWeight="Bold"/>
+                    </Grid>
+                </Border>
+
+                <!-- Plugin List -->
+                <ItemsControl ItemsSource="{Binding Plugins}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="10,8">
+                                <Grid ColumnDefinitions="2*,*,100,100,*">
+                                    <TextBlock Grid.Column="0" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Version}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding SupportsOg}"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding SupportsNg}"/>
+                                    <TextBlock Grid.Column="4" Text="{Binding Compatibility}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
     </DockPanel>
 
 </UserControl>

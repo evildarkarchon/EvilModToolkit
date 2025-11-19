@@ -1,10 +1,12 @@
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Game;
+using EvilModToolkit.Services.Patching;
 using EvilModToolkit.Services.Platform;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -19,6 +21,7 @@ namespace EvilModToolkit.ViewModels
         private readonly IGameDetectionService _gameDetectionService;
         private readonly IModManagerService _modManagerService;
         private readonly ISystemInfoService _systemInfoService;
+        private readonly IBA2ArchiveService _ba2ArchiveService;
         private readonly ILogger<OverviewViewModel> _logger;
 
         private GameInfo? _gameInfo;
@@ -26,6 +29,11 @@ namespace EvilModToolkit.ViewModels
         private SystemInfo? _systemInfo;
         private bool _isF4SeInstalled;
         private string? _f4SeVersion;
+        private int _ba2CountGeneral;
+        private int _ba2CountTexture;
+        private int _ba2CountV1;
+        private int _ba2CountV7V8;
+        private int _ba2CountUnreadable;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OverviewViewModel"/> class.
@@ -34,11 +42,13 @@ namespace EvilModToolkit.ViewModels
             IGameDetectionService gameDetectionService,
             IModManagerService modManagerService,
             ISystemInfoService systemInfoService,
+            IBA2ArchiveService ba2ArchiveService,
             ILogger<OverviewViewModel> logger)
         {
             _gameDetectionService = gameDetectionService ?? throw new ArgumentNullException(nameof(gameDetectionService));
             _modManagerService = modManagerService ?? throw new ArgumentNullException(nameof(modManagerService));
             _systemInfoService = systemInfoService ?? throw new ArgumentNullException(nameof(systemInfoService));
+            _ba2ArchiveService = ba2ArchiveService ?? throw new ArgumentNullException(nameof(ba2ArchiveService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             Problems = new ObservableCollection<ScanResult>();
@@ -58,7 +68,11 @@ namespace EvilModToolkit.ViewModels
         public GameInfo? GameInfo
         {
             get => _gameInfo;
-            private set => this.RaiseAndSetIfChanged(ref _gameInfo, value);
+            private set
+            {
+                this.RaiseAndSetIfChanged(ref _gameInfo, value);
+                this.RaisePropertyChanged(nameof(IsGameDetected));
+            }
         }
 
         /// <summary>
@@ -67,7 +81,11 @@ namespace EvilModToolkit.ViewModels
         public ModManagerInfo? ModManagerInfo
         {
             get => _modManagerInfo;
-            private set => this.RaiseAndSetIfChanged(ref _modManagerInfo, value);
+            private set
+            {
+                this.RaiseAndSetIfChanged(ref _modManagerInfo, value);
+                this.RaisePropertyChanged(nameof(IsModManagerDetected));
+            }
         }
 
         /// <summary>
@@ -113,6 +131,56 @@ namespace EvilModToolkit.ViewModels
         public bool IsModManagerDetected => ModManagerInfo != null && ModManagerInfo.Type != ModManagerType.None;
 
         /// <summary>
+        /// Gets the count of General (GNRL) BA2 archives.
+        /// </summary>
+        public int BA2CountGeneral
+        {
+            get => _ba2CountGeneral;
+            private set => this.RaiseAndSetIfChanged(ref _ba2CountGeneral, value);
+        }
+
+        /// <summary>
+        /// Gets the count of Texture (DX10) BA2 archives.
+        /// </summary>
+        public int BA2CountTexture
+        {
+            get => _ba2CountTexture;
+            private set => this.RaiseAndSetIfChanged(ref _ba2CountTexture, value);
+        }
+
+        /// <summary>
+        /// Gets the total count of BA2 archives (General + Texture).
+        /// </summary>
+        public int BA2CountTotal => BA2CountGeneral + BA2CountTexture;
+
+        /// <summary>
+        /// Gets the count of v1 (OG) BA2 archives.
+        /// </summary>
+        public int BA2CountV1
+        {
+            get => _ba2CountV1;
+            private set => this.RaiseAndSetIfChanged(ref _ba2CountV1, value);
+        }
+
+        /// <summary>
+        /// Gets the count of v7/v8 (NG) BA2 archives.
+        /// </summary>
+        public int BA2CountV7V8
+        {
+            get => _ba2CountV7V8;
+            private set => this.RaiseAndSetIfChanged(ref _ba2CountV7V8, value);
+        }
+
+        /// <summary>
+        /// Gets the count of unreadable BA2 archives.
+        /// </summary>
+        public int BA2CountUnreadable
+        {
+            get => _ba2CountUnreadable;
+            private set => this.RaiseAndSetIfChanged(ref _ba2CountUnreadable, value);
+        }
+
+        /// <summary>
         /// Gets the command to refresh all information.
         /// </summary>
         public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
@@ -155,6 +223,9 @@ namespace EvilModToolkit.ViewModels
 
                         // Check for F4SE
                         await DetectF4SeAsync();
+
+                        // Scan BA2 archives
+                        await ScanBA2ArchivesAsync();
                     }
 
                     // Detect mod manager
@@ -209,7 +280,12 @@ namespace EvilModToolkit.ViewModels
 
                     // Try to get version info
                     var versionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(f4sePath);
-                    F4SeVersion = $"{versionInfo.FileMajorPart}.{versionInfo.FileMinorPart}.{versionInfo.FileBuildPart}";
+                    // F4SE uses Minor.Build.Revision format (e.g., 0.7.2)
+                    // ProductVersion might have commas, so clean it up
+                    var productVersion = versionInfo.ProductVersion?.Replace(", ", ".").Trim();
+                    F4SeVersion = !string.IsNullOrEmpty(productVersion) && productVersion != "0.0.0.0"
+                        ? productVersion
+                        : $"{versionInfo.FileMinorPart}.{versionInfo.FileBuildPart}.{versionInfo.FilePrivatePart}";
 
                     _logger.LogInformation("F4SE detected: version {Version}", F4SeVersion);
                 }
@@ -234,6 +310,101 @@ namespace EvilModToolkit.ViewModels
                 _logger.LogError(ex, "Error detecting F4SE");
                 IsF4SeInstalled = false;
                 F4SeVersion = null;
+            }
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Scans the Data directory for BA2 archives and counts them by type and version.
+        /// </summary>
+        private async Task ScanBA2ArchivesAsync()
+        {
+            // Reset counts
+            BA2CountGeneral = 0;
+            BA2CountTexture = 0;
+            BA2CountV1 = 0;
+            BA2CountV7V8 = 0;
+            BA2CountUnreadable = 0;
+
+            if (GameInfo == null || string.IsNullOrEmpty(GameInfo.DataPath))
+            {
+                _logger.LogDebug("Cannot scan BA2 archives: Data path is null");
+                return;
+            }
+
+            if (!Directory.Exists(GameInfo.DataPath))
+            {
+                _logger.LogWarning("Data directory does not exist: {DataPath}", GameInfo.DataPath);
+                return;
+            }
+
+            try
+            {
+                _logger.LogInformation("Scanning BA2 archives in: {DataPath}", GameInfo.DataPath);
+
+                var ba2Files = Directory.GetFiles(GameInfo.DataPath, "*.ba2", SearchOption.TopDirectoryOnly);
+                _logger.LogInformation("Found {Count} BA2 files", ba2Files.Length);
+
+                foreach (var ba2File in ba2Files)
+                {
+                    try
+                    {
+                        var archiveInfo = _ba2ArchiveService.GetArchiveInfo(ba2File);
+                        if (archiveInfo == null || !archiveInfo.IsValid)
+                        {
+                            BA2CountUnreadable++;
+                            _logger.LogWarning("Unreadable BA2 archive: {FileName}", Path.GetFileName(ba2File));
+                            continue;
+                        }
+
+                        // Count by type (GNRL vs DX10)
+                        if (archiveInfo.Type == BA2Type.General)
+                        {
+                            BA2CountGeneral++;
+                        }
+                        else if (archiveInfo.Type == BA2Type.Texture)
+                        {
+                            BA2CountTexture++;
+                        }
+                        else
+                        {
+                            BA2CountUnreadable++;
+                            _logger.LogWarning("Unknown BA2 type: {FileName}", Path.GetFileName(ba2File));
+                            continue;
+                        }
+
+                        // Count by version (v1 vs v7/v8)
+                        if (archiveInfo.Version == BA2Version.V1)
+                        {
+                            BA2CountV1++;
+                        }
+                        else if (archiveInfo.Version == BA2Version.V7 || archiveInfo.Version == BA2Version.V8)
+                        {
+                            BA2CountV7V8++;
+                        }
+                        else
+                        {
+                            _logger.LogDebug("Unknown version for {FileName}: {Version}",
+                                Path.GetFileName(ba2File), archiveInfo.Version);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        BA2CountUnreadable++;
+                        _logger.LogError(ex, "Error reading BA2 archive: {FileName}", Path.GetFileName(ba2File));
+                    }
+                }
+
+                // Raise property changed for the total count
+                this.RaisePropertyChanged(nameof(BA2CountTotal));
+
+                _logger.LogInformation("BA2 scan complete: GNRL={General}, DX10={Texture}, Total={Total}, v1={V1}, v7/8={V7V8}, Unreadable={Unreadable}",
+                    BA2CountGeneral, BA2CountTexture, BA2CountTotal, BA2CountV1, BA2CountV7V8, BA2CountUnreadable);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error scanning BA2 archives");
             }
 
             await Task.CompletedTask;

@@ -26,6 +26,11 @@ public class BA2ArchiveInfo
     public BA2Version Version { get; init; }
 
     /// <summary>
+    /// Gets the BA2 archive type (General or Texture).
+    /// </summary>
+    public BA2Type Type { get; init; }
+
+    /// <summary>
     /// Gets the file size in bytes.
     /// </summary>
     public long FileSizeBytes { get; init; }

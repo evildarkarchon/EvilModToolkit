@@ -1,5 +1,6 @@
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Game;
+using EvilModToolkit.Services.Patching;
 using EvilModToolkit.Services.Platform;
 using EvilModToolkit.ViewModels;
 using FluentAssertions;
@@ -19,6 +20,7 @@ namespace EvilModToolkit.Tests.ViewModels
         private readonly IGameDetectionService _gameDetectionService;
         private readonly IModManagerService _modManagerService;
         private readonly ISystemInfoService _systemInfoService;
+        private readonly IBA2ArchiveService _ba2ArchiveService;
         private readonly ILogger<OverviewViewModel> _logger;
 
         public OverviewViewModelTests()
@@ -26,6 +28,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _gameDetectionService = Substitute.For<IGameDetectionService>();
             _modManagerService = Substitute.For<IModManagerService>();
             _systemInfoService = Substitute.For<ISystemInfoService>();
+            _ba2ArchiveService = Substitute.For<IBA2ArchiveService>();
             _logger = Substitute.For<ILogger<OverviewViewModel>>();
         }
 
@@ -43,6 +46,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -64,6 +68,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 null!,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Assert
@@ -79,6 +84,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 null!,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Assert
@@ -94,11 +100,28 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 null!,
+                _ba2ArchiveService,
                 _logger);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
                 .WithParameterName("systemInfoService");
+        }
+
+        [Fact]
+        public void Constructor_ThrowsArgumentNullException_WhenBA2ArchiveServiceIsNull()
+        {
+            // Act
+            Action act = () => new OverviewViewModel(
+                _gameDetectionService,
+                _modManagerService,
+                _systemInfoService,
+                null!,
+                _logger);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("ba2ArchiveService");
         }
 
         [Fact]
@@ -109,6 +132,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 null!);
 
             // Assert
@@ -140,6 +164,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -170,6 +195,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -216,6 +242,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -252,6 +279,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -282,6 +310,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -316,6 +345,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh (which will add a "game not found" problem)
@@ -356,6 +386,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Wait for initial refresh to complete
@@ -377,6 +408,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Act
@@ -395,6 +427,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Act & Assert
@@ -409,6 +442,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _logger);
 
             // Act & Assert

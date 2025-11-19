@@ -47,22 +47,46 @@
                     <!-- Game Path Override -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="Fallout 4 Installation Path:"/>
-                        <TextBox Text="{Binding GamePathOverride}"
-                                Watermark="e.g., C:\Program Files\Steam\steamapps\common\Fallout 4"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding GamePathOverride}"
+                                    Watermark="e.g., C:\Program Files\Steam\steamapps\common\Fallout 4"
+                                    Margin="0,0,5,0"/>
+                            <Button Grid.Column="1"
+                                   Content="Browse..."
+                                   Command="{Binding BrowseGamePathCommand}"
+                                   Padding="15,5"/>
+                        </Grid>
                     </StackPanel>
 
                     <!-- MO2 Path Override -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="Mod Organizer 2 Path:"/>
-                        <TextBox Text="{Binding MO2PathOverride}"
-                                Watermark="e.g., C:\Modding\MO2"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding MO2PathOverride}"
+                                    Watermark="e.g., C:\Modding\MO2"
+                                    Margin="0,0,5,0"/>
+                            <Button Grid.Column="1"
+                                   Content="Browse..."
+                                   Command="{Binding BrowseMO2PathCommand}"
+                                   Padding="15,5"/>
+                        </Grid>
                     </StackPanel>
 
                     <!-- Vortex Path Override -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="Vortex Path:"/>
-                        <TextBox Text="{Binding VortexPathOverride}"
-                                Watermark="e.g., C:\Program Files\Black Tree Gaming Ltd\Vortex"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding VortexPathOverride}"
+                                    Watermark="e.g., C:\Program Files\Black Tree Gaming Ltd\Vortex"
+                                    Margin="0,0,5,0"/>
+                            <Button Grid.Column="1"
+                                   Content="Browse..."
+                                   Command="{Binding BrowseVortexPathCommand}"
+                                   Padding="15,5"/>
+                        </Grid>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -80,15 +104,31 @@
                     <!-- F4SE Scan Directory -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="Last F4SE Scan Directory:"/>
-                        <TextBox Text="{Binding LastF4SEScanDirectory}"
-                                Watermark="e.g., C:\Games\Fallout 4\Data\F4SE\Plugins"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding LastF4SEScanDirectory}"
+                                    Watermark="e.g., [Game Install]\Data\F4SE\Plugins"
+                                    Margin="0,0,5,0"/>
+                            <Button Grid.Column="1"
+                                   Content="Browse..."
+                                   Command="{Binding BrowseF4SEScanDirectoryCommand}"
+                                   Padding="15,5"/>
+                        </Grid>
                     </StackPanel>
 
                     <!-- BA2 Patch Directory -->
                     <StackPanel Spacing="5">
                         <TextBlock Text="Last BA2 Patch Directory:"/>
-                        <TextBox Text="{Binding LastBA2PatchDirectory}"
-                                Watermark="e.g., C:\Games\Fallout 4\Data"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding LastBA2PatchDirectory}"
+                                    Watermark="e.g., [Game Install]\Data"
+                                    Margin="0,0,5,0"/>
+                            <Button Grid.Column="1"
+                                   Content="Browse..."
+                                   Command="{Binding BrowseBA2PatchDirectoryCommand}"
+                                   Padding="15,5"/>
+                        </Grid>
                     </StackPanel>
 
                     <!-- Scan Recursively -->

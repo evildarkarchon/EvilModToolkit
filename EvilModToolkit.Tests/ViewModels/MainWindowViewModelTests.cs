@@ -28,6 +28,7 @@ namespace EvilModToolkit.Tests.ViewModels
         private readonly ISystemInfoService _systemInfoService;
         private readonly IF4SEPluginService _pluginService;
         private readonly ISettingsService _settingsService;
+        private readonly IDialogService _dialogService;
         private readonly IBA2ArchiveService _ba2ArchiveService;
         private readonly IXDeltaPatcherService _xdeltaPatcherService;
 
@@ -46,6 +47,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _systemInfoService = Substitute.For<ISystemInfoService>();
             _pluginService = Substitute.For<IF4SEPluginService>();
             _settingsService = Substitute.For<ISettingsService>();
+            _dialogService = Substitute.For<IDialogService>();
             _ba2ArchiveService = Substitute.For<IBA2ArchiveService>();
             _xdeltaPatcherService = Substitute.For<IXDeltaPatcherService>();
 
@@ -74,6 +76,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _gameDetectionService,
                 _modManagerService,
                 _systemInfoService,
+                _ba2ArchiveService,
                 _overviewLogger);
 
             var f4se = new F4SEViewModel(
@@ -83,6 +86,7 @@ namespace EvilModToolkit.Tests.ViewModels
 
             var settings = new SettingsViewModel(
                 _settingsService,
+                _dialogService,
                 _settingsLogger);
 
             var tools = new ToolsViewModel(

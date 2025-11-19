@@ -48,7 +48,6 @@ namespace EvilModToolkit.Tests.ViewModels
             viewModel.TargetVersion.Should().Be(BA2Version.V1);
             viewModel.SourceFilePath.Should().BeEmpty();
             viewModel.PatchFilePath.Should().BeEmpty();
-            viewModel.OutputFilePath.Should().BeEmpty();
             viewModel.PatchBA2Command.Should().NotBeNull();
             viewModel.ApplyPatchCommand.Should().NotBeNull();
         }
@@ -152,20 +151,6 @@ namespace EvilModToolkit.Tests.ViewModels
 
             // Assert
             viewModel.PatchFilePath.Should().Be(testPath);
-        }
-
-        [Fact]
-        public void OutputFilePath_CanBeSetAndRetrieved()
-        {
-            // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
-            var testPath = @"C:\Games\Fallout4\Fallout4_Patched.exe";
-
-            // Act
-            viewModel.OutputFilePath = testPath;
-
-            // Assert
-            viewModel.OutputFilePath.Should().Be(testPath);
         }
 
         #endregion
@@ -393,7 +378,6 @@ namespace EvilModToolkit.Tests.ViewModels
             var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
             viewModel.SourceFilePath = string.Empty;
             viewModel.PatchFilePath = @"C:\patch.xdelta";
-            viewModel.OutputFilePath = @"C:\output.exe";
 
             // Act
             await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -409,7 +393,6 @@ namespace EvilModToolkit.Tests.ViewModels
             var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
             viewModel.SourceFilePath = @"C:\source.exe";
             viewModel.PatchFilePath = string.Empty;
-            viewModel.OutputFilePath = @"C:\output.exe";
 
             // Act
             await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -419,29 +402,12 @@ namespace EvilModToolkit.Tests.ViewModels
         }
 
         [Fact]
-        public async Task ApplyPatchCommand_SetsError_WhenOutputFilePathIsEmpty()
-        {
-            // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
-            viewModel.SourceFilePath = @"C:\source.exe";
-            viewModel.PatchFilePath = @"C:\patch.xdelta";
-            viewModel.OutputFilePath = string.Empty;
-
-            // Act
-            await viewModel.ApplyPatchCommand.Execute().FirstAsync();
-
-            // Assert
-            viewModel.ErrorMessage.Should().Contain("Output file path is required");
-        }
-
-        [Fact]
         public async Task ApplyPatchCommand_SetsError_WhenSourceFileNotFound()
         {
             // Arrange
             var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
             viewModel.SourceFilePath = @"C:\NonExistent\source.exe";
             viewModel.PatchFilePath = @"C:\patch.xdelta";
-            viewModel.OutputFilePath = @"C:\output.exe";
 
             // Act
             await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -460,7 +426,6 @@ namespace EvilModToolkit.Tests.ViewModels
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = @"C:\NonExistent\patch.xdelta";
-                viewModel.OutputFilePath = @"C:\output.exe";
 
                 // Act
                 await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -476,26 +441,26 @@ namespace EvilModToolkit.Tests.ViewModels
         }
 
         [Fact]
-        public async Task ApplyPatchCommand_SetsError_WhenXDelta3NotAvailable()
+        public async Task ApplyPatchCommand_SetsError_WhenValidationFails()
         {
             // Arrange
             var tempSourceFile = Path.GetTempFileName();
             var tempPatchFile = Path.GetTempFileName();
             try
             {
-                _xdeltaPatcherService.IsXDelta3Available().Returns(false);
-                _xdeltaPatcherService.GetXDelta3Path().Returns((string?)null);
+                // Setup validation to fail
+                _xdeltaPatcherService.ValidatePatchAsync(tempSourceFile, tempPatchFile)
+                    .Returns(Task.FromResult((false, (string?)"xdelta3.exe not found")));
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
-                viewModel.OutputFilePath = @"C:\output.exe";
 
                 // Act
                 await viewModel.ApplyPatchCommand.Execute().FirstAsync();
 
                 // Assert
-                viewModel.ErrorMessage.Should().Contain("xdelta3.exe not found");
+                viewModel.ErrorMessage.Should().Contain("Patch validation failed");
             }
             finally
             {
@@ -512,27 +477,39 @@ namespace EvilModToolkit.Tests.ViewModels
             // Arrange
             var tempSourceFile = Path.GetTempFileName();
             var tempPatchFile = Path.GetTempFileName();
-            var tempOutputFile = Path.GetTempFileName();
+            var tempDir = Path.GetDirectoryName(tempSourceFile)!;
+            var tempOutputFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_temp{Path.GetExtension(tempSourceFile)}");
+            var backupFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_patchBackup{Path.GetExtension(tempSourceFile)}");
+
             try
             {
-                _xdeltaPatcherService.IsXDelta3Available().Returns(true);
+                // Setup validation to pass
+                _xdeltaPatcherService.ValidatePatchAsync(tempSourceFile, tempPatchFile)
+                    .Returns(Task.FromResult((true, (string?)null)));
+
+                // Setup patch to succeed
                 _xdeltaPatcherService.ApplyPatchAsync(
                     tempSourceFile,
                     tempPatchFile,
-                    tempOutputFile,
+                    Arg.Any<string>(), // Will be temp output path
                     Arg.Any<IProgress<PatchProgress>>(),
                     Arg.Any<CancellationToken>())
-                    .Returns(Task.FromResult(new PatchResult
+                    .Returns(callInfo =>
                     {
-                        Success = true,
-                        OutputFilePath = tempOutputFile,
-                        ExitCode = 0
-                    }));
+                        // Create the temp output file to simulate successful patch
+                        var outputPath = callInfo.ArgAt<string>(2);
+                        File.WriteAllText(outputPath, "Patched content");
+                        return Task.FromResult(new PatchResult
+                        {
+                            Success = true,
+                            OutputFilePath = outputPath,
+                            ExitCode = 0
+                        });
+                    });
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
-                viewModel.OutputFilePath = tempOutputFile;
 
                 // Act
                 await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -542,21 +519,28 @@ namespace EvilModToolkit.Tests.ViewModels
                 viewModel.StatusMessage.Should().Contain("successfully");
                 viewModel.ProgressPercentage.Should().Be(100);
 
+                // Verify validation was called
+                await _xdeltaPatcherService.Received(1).ValidatePatchAsync(tempSourceFile, tempPatchFile);
+
+                // Verify patch was applied
                 await _xdeltaPatcherService.Received(1).ApplyPatchAsync(
                     tempSourceFile,
                     tempPatchFile,
-                    tempOutputFile,
+                    Arg.Any<string>(),
                     Arg.Any<IProgress<PatchProgress>>(),
                     Arg.Any<CancellationToken>());
             }
             finally
             {
+                // Clean up temp files
                 if (File.Exists(tempSourceFile))
                     File.Delete(tempSourceFile);
                 if (File.Exists(tempPatchFile))
                     File.Delete(tempPatchFile);
                 if (File.Exists(tempOutputFile))
                     File.Delete(tempOutputFile);
+                if (File.Exists(backupFile))
+                    File.Delete(backupFile);
             }
         }
 
@@ -566,23 +550,29 @@ namespace EvilModToolkit.Tests.ViewModels
             // Arrange
             var tempSourceFile = Path.GetTempFileName();
             var tempPatchFile = Path.GetTempFileName();
-            var tempOutputFile = Path.GetTempFileName();
+            var tempDir = Path.GetDirectoryName(tempSourceFile)!;
+            var tempOutputFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_temp{Path.GetExtension(tempSourceFile)}");
+            var backupFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_patchBackup{Path.GetExtension(tempSourceFile)}");
+
             try
             {
-                _xdeltaPatcherService.IsXDelta3Available().Returns(true);
+                // Setup validation to pass
+                _xdeltaPatcherService.ValidatePatchAsync(tempSourceFile, tempPatchFile)
+                    .Returns(Task.FromResult((true, (string?)null)));
 
                 // Capture the progress reporter passed to ApplyPatchAsync
-                IProgress<PatchProgress>? capturedProgress = null;
                 _xdeltaPatcherService.ApplyPatchAsync(
                     tempSourceFile,
                     tempPatchFile,
-                    tempOutputFile,
-                    Arg.Do<IProgress<PatchProgress>>(p => capturedProgress = p),
+                    Arg.Any<string>(),
+                    Arg.Do<IProgress<PatchProgress>>(p => { }),
                     Arg.Any<CancellationToken>())
                     .Returns(async callInfo =>
                     {
                         // Simulate progress updates
                         var progress = callInfo.ArgAt<IProgress<PatchProgress>>(3);
+                        var outputPath = callInfo.ArgAt<string>(2);
+
                         progress?.Report(new PatchProgress
                         {
                             Stage = PatchStage.Starting,
@@ -608,13 +598,14 @@ namespace EvilModToolkit.Tests.ViewModels
                             Message = "Patch complete"
                         });
 
-                        return new PatchResult { Success = true, OutputFilePath = tempOutputFile };
+                        // Create the temp output file
+                        File.WriteAllText(outputPath, "Patched content");
+                        return new PatchResult { Success = true, OutputFilePath = outputPath };
                     });
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
-                viewModel.OutputFilePath = tempOutputFile;
 
                 // Act
                 await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -631,6 +622,8 @@ namespace EvilModToolkit.Tests.ViewModels
                     File.Delete(tempPatchFile);
                 if (File.Exists(tempOutputFile))
                     File.Delete(tempOutputFile);
+                if (File.Exists(backupFile))
+                    File.Delete(backupFile);
             }
         }
 
@@ -642,7 +635,10 @@ namespace EvilModToolkit.Tests.ViewModels
             var tempPatchFile = Path.GetTempFileName();
             try
             {
-                _xdeltaPatcherService.IsXDelta3Available().Returns(true);
+                // Setup validation to pass
+                _xdeltaPatcherService.ValidatePatchAsync(tempSourceFile, tempPatchFile)
+                    .Returns(Task.FromResult((true, (string?)null)));
+
                 _xdeltaPatcherService.ApplyPatchAsync(
                     tempSourceFile,
                     tempPatchFile,
@@ -660,7 +656,6 @@ namespace EvilModToolkit.Tests.ViewModels
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
-                viewModel.OutputFilePath = @"C:\output.exe";
 
                 // Act
                 await viewModel.ApplyPatchCommand.Execute().FirstAsync();
@@ -685,7 +680,10 @@ namespace EvilModToolkit.Tests.ViewModels
             var tempPatchFile = Path.GetTempFileName();
             try
             {
-                _xdeltaPatcherService.IsXDelta3Available().Returns(true);
+                // Setup validation to pass
+                _xdeltaPatcherService.ValidatePatchAsync(tempSourceFile, tempPatchFile)
+                    .Returns(Task.FromResult((true, (string?)null)));
+
                 _xdeltaPatcherService.ApplyPatchAsync(
                     tempSourceFile,
                     tempPatchFile,
@@ -702,7 +700,6 @@ namespace EvilModToolkit.Tests.ViewModels
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
-                viewModel.OutputFilePath = @"C:\output.exe";
 
                 // Act - Start the command but don't await yet
                 var commandTask = viewModel.ApplyPatchCommand.Execute().FirstAsync();

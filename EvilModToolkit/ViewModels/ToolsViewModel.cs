@@ -25,7 +25,6 @@ namespace EvilModToolkit.ViewModels
         // Game Patcher (xdelta) properties
         private string _sourceFilePath = string.Empty;
         private string _patchFilePath = string.Empty;
-        private string _outputFilePath = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolsViewModel"/> class.
@@ -96,16 +95,8 @@ namespace EvilModToolkit.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the path where the patched output file should be written.
-        /// </summary>
-        public string OutputFilePath
-        {
-            get => _outputFilePath;
-            set => this.RaiseAndSetIfChanged(ref _outputFilePath, value);
-        }
-
-        /// <summary>
         /// Gets the command to apply an xdelta patch to a file.
+        /// The patch will be applied in-place to the source file, with automatic backup creation.
         /// </summary>
         public ReactiveCommand<Unit, Unit> ApplyPatchCommand { get; }
 
@@ -191,7 +182,8 @@ namespace EvilModToolkit.ViewModels
         #region xdelta Patching Methods
 
         /// <summary>
-        /// Applies an xdelta patch to a source file to produce an output file.
+        /// Applies an xdelta patch to a source file in-place with automatic backup.
+        /// Creates a backup of the source file before applying the patch.
         /// </summary>
         /// <returns>A task representing the async operation.</returns>
         private async Task ApplyPatchAsync()
@@ -203,8 +195,8 @@ namespace EvilModToolkit.ViewModels
                 ProgressPercentage = 0;
                 CreateCancellationTokenSource(); // Create cancellation token for this operation
                 SetStatus("Applying xdelta patch...");
-                _logger.LogInformation("Starting xdelta patch operation: {SourceFile} + {PatchFile} -> {OutputFile}",
-                    SourceFilePath, PatchFilePath, OutputFilePath);
+                _logger.LogInformation("Starting xdelta patch operation: {SourceFile} + {PatchFile}",
+                    SourceFilePath, PatchFilePath);
 
                 try
                 {
@@ -219,11 +211,6 @@ namespace EvilModToolkit.ViewModels
                         throw new InvalidOperationException("Patch file path is required.");
                     }
 
-                    if (string.IsNullOrWhiteSpace(OutputFilePath))
-                    {
-                        throw new InvalidOperationException("Output file path is required.");
-                    }
-
                     // Validate file existence
                     if (!File.Exists(SourceFilePath))
                     {
@@ -235,49 +222,105 @@ namespace EvilModToolkit.ViewModels
                         throw new FileNotFoundException($"Patch file not found: {PatchFilePath}");
                     }
 
-                    // Check if xdelta3 is available
-                    if (!_xdeltaPatcherService.IsXDelta3Available())
-                    {
-                        var xdeltaPath = _xdeltaPatcherService.GetXDelta3Path();
-                        throw new InvalidOperationException(
-                            $"xdelta3.exe not found. Expected location: {xdeltaPath ?? "Not configured"}");
-                    }
+                    // Validate the patch before attempting to apply
+                    SetStatus("Validating patch compatibility...");
+                    _logger.LogInformation("Validating patch: {PatchFile} for source: {SourceFile}",
+                        PatchFilePath, SourceFilePath);
 
-                    // Create progress reporter that updates ViewModel progress state
-                    var progress = new Progress<PatchProgress>(progressUpdate =>
-                    {
-                        // Update progress percentage
-                        ProgressPercentage = progressUpdate.Percentage;
-
-                        // Update status message with current stage
-                        SetStatus($"{progressUpdate.Message} ({progressUpdate.Percentage}%)");
-
-                        _logger.LogDebug("Patch progress: {Stage} - {Percentage}% - {Message}",
-                            progressUpdate.Stage, progressUpdate.Percentage, progressUpdate.Message);
-                    });
-
-                    // Apply the patch with progress reporting and cancellation support
-                    var result = await _xdeltaPatcherService.ApplyPatchAsync(
+                    var (isValid, validationError) = await _xdeltaPatcherService.ValidatePatchAsync(
                         SourceFilePath,
-                        PatchFilePath,
-                        OutputFilePath,
-                        progress,
-                        CancellationToken);
+                        PatchFilePath);
 
-                    // Check the result
-                    if (result.Success)
+                    if (!isValid)
                     {
-                        ProgressPercentage = 100;
-                        SetStatus($"Patch applied successfully. Output: {result.OutputFilePath}");
-                        _logger.LogInformation("xdelta patch applied successfully: {OutputPath}", result.OutputFilePath);
-                    }
-                    else
-                    {
-                        // Patch failed - include error details in exception
                         throw new InvalidOperationException(
-                            $"Patch operation failed: {result.ErrorMessage}\n" +
-                            $"Exit Code: {result.ExitCode}\n" +
-                            $"Standard Error: {result.StandardError}");
+                            $"Patch validation failed: {validationError}");
+                    }
+
+                    _logger.LogInformation("Patch validation successful");
+
+                    // Generate backup file path (e.g., Fallout4_patchBackup.exe)
+                    var sourceFileInfo = new FileInfo(SourceFilePath);
+                    var backupFileName = $"{Path.GetFileNameWithoutExtension(sourceFileInfo.Name)}_patchBackup{sourceFileInfo.Extension}";
+                    var backupFilePath = Path.Combine(sourceFileInfo.DirectoryName ?? string.Empty, backupFileName);
+
+                    // Generate temporary output path for the patched file
+                    var tempOutputPath = Path.Combine(
+                        sourceFileInfo.DirectoryName ?? string.Empty,
+                        $"{Path.GetFileNameWithoutExtension(sourceFileInfo.Name)}_temp{sourceFileInfo.Extension}");
+
+                    try
+                    {
+                        // Create progress reporter that updates ViewModel progress state
+                        var progress = new Progress<PatchProgress>(progressUpdate =>
+                        {
+                            // Update progress percentage
+                            ProgressPercentage = progressUpdate.Percentage;
+
+                            // Update status message with current stage
+                            SetStatus($"{progressUpdate.Message} ({progressUpdate.Percentage}%)");
+
+                            _logger.LogDebug("Patch progress: {Stage} - {Percentage}% - {Message}",
+                                progressUpdate.Stage, progressUpdate.Percentage, progressUpdate.Message);
+                        });
+
+                        // Apply the patch to a temporary output file
+                        var result = await _xdeltaPatcherService.ApplyPatchAsync(
+                            SourceFilePath,
+                            PatchFilePath,
+                            tempOutputPath,
+                            progress,
+                            CancellationToken);
+
+                        // Check the result
+                        if (!result.Success)
+                        {
+                            // Patch failed - include error details in exception
+                            throw new InvalidOperationException(
+                                $"Patch operation failed: {result.ErrorMessage}\n" +
+                                $"Exit Code: {result.ExitCode}\n" +
+                                $"Standard Error: {result.StandardError}");
+                        }
+
+                        // Patch successful - now perform the backup and replacement
+                        SetStatus("Creating backup and replacing source file...");
+                        _logger.LogInformation("Patch successful, creating backup at: {BackupPath}", backupFilePath);
+
+                        // If a backup already exists, delete it
+                        if (File.Exists(backupFilePath))
+                        {
+                            _logger.LogInformation("Removing existing backup file: {BackupPath}", backupFilePath);
+                            File.Delete(backupFilePath);
+                        }
+
+                        // Move the original file to backup
+                        File.Move(SourceFilePath, backupFilePath);
+                        _logger.LogInformation("Source file backed up to: {BackupPath}", backupFilePath);
+
+                        // Move the patched file to the original location
+                        File.Move(tempOutputPath, SourceFilePath);
+                        _logger.LogInformation("Patched file moved to: {SourcePath}", SourceFilePath);
+
+                        ProgressPercentage = 100;
+                        SetStatus($"Patch applied successfully. Backup saved as: {backupFileName}");
+                        _logger.LogInformation("xdelta patch completed successfully. Original backed up to: {BackupPath}", backupFilePath);
+                    }
+                    catch
+                    {
+                        // If something went wrong during backup/replacement, try to clean up temp file
+                        if (File.Exists(tempOutputPath))
+                        {
+                            try
+                            {
+                                File.Delete(tempOutputPath);
+                                _logger.LogInformation("Cleaned up temporary output file: {TempPath}", tempOutputPath);
+                            }
+                            catch (Exception cleanupEx)
+                            {
+                                _logger.LogWarning(cleanupEx, "Failed to clean up temporary file: {TempPath}", tempOutputPath);
+                            }
+                        }
+                        throw;
                     }
                 }
                 finally

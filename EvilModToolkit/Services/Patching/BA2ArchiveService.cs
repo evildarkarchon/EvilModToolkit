@@ -13,7 +13,10 @@ public class BA2ArchiveService : IBA2ArchiveService
 {
     private const int MagicOffset = 0;
     private const int VersionOffset = 4;
+    private const int TypeOffset = 8;
     private const uint ExpectedMagic = 0x58445442; // "BTDX" in little-endian
+    private const uint GeneralMagic = 0x4C524E47; // "GNRL" in little-endian
+    private const uint TextureMagic = 0x30315844; // "DX10" in little-endian
 
     private readonly ILogger<BA2ArchiveService> _logger;
 
@@ -35,13 +38,15 @@ public class BA2ArchiveService : IBA2ArchiveService
 
             var fileInfo = new FileInfo(filePath);
             var version = ReadVersion(filePath);
+            var type = ReadType(filePath);
 
             return new BA2ArchiveInfo
             {
                 FilePath = filePath,
                 FileName = Path.GetFileName(filePath),
-                IsValid = version != BA2Version.Unknown,
+                IsValid = version != BA2Version.Unknown && type != BA2Type.Unknown,
                 Version = version,
+                Type = type,
                 FileSizeBytes = fileInfo.Length,
                 IsReadOnly = fileInfo.IsReadOnly
             };
@@ -166,6 +171,34 @@ public class BA2ArchiveService : IBA2ArchiveService
         {
             _logger.LogDebug(ex, "Error reading BA2 version: {FilePath}", filePath);
             return BA2Version.Unknown;
+        }
+    }
+
+    private BA2Type ReadType(string filePath)
+    {
+        try
+        {
+            if (!IsValidBA2(filePath))
+                return BA2Type.Unknown;
+
+            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            stream.Seek(TypeOffset, SeekOrigin.Begin);
+
+            var buffer = new byte[4];
+            stream.Read(buffer, 0, 4);
+            var typeMagic = BitConverter.ToUInt32(buffer, 0);
+
+            return typeMagic switch
+            {
+                GeneralMagic => BA2Type.General,
+                TextureMagic => BA2Type.Texture,
+                _ => BA2Type.Unknown
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Error reading BA2 type: {FilePath}", filePath);
+            return BA2Type.Unknown;
         }
     }
 }
