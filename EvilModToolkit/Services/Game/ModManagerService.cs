@@ -44,7 +44,7 @@ public class ModManagerService : IModManagerService
                 switch (processInfo.Type)
                 {
                     case ModManagerType.ModOrganizer2:
-                        return Task.FromResult(DetectMO2FromProcess(processInfo));
+                        return Task.FromResult(DetectMo2FromProcess(processInfo));
                     case ModManagerType.Vortex:
                         return Task.FromResult(DetectVortexFromProcess(processInfo));
                 }
@@ -321,6 +321,7 @@ public class ModManagerService : IModManagerService
                 {
                     settings.CustomExecutables[toolName] = new List<string>();
                 }
+
                 settings.CustomExecutables[toolName].Add(value);
             }
         }
@@ -392,7 +393,7 @@ public class ModManagerService : IModManagerService
         return null;
     }
 
-    private ModManagerInfo DetectMO2FromProcess(ModManagerInfo processInfo)
+    private ModManagerInfo DetectMo2FromProcess(ModManagerInfo processInfo)
     {
         try
         {
@@ -404,7 +405,7 @@ public class ModManagerService : IModManagerService
             var version = versionInfo?.FileVersion ?? "Unknown";
 
             // Find ModOrganizer.ini
-            var iniPath = FindMO2IniFile(workingDir);
+            var iniPath = FindMo2IniFile(workingDir);
 
             MO2Settings? mo2Settings = null;
             string? gamePath = null;
@@ -467,7 +468,7 @@ public class ModManagerService : IModManagerService
         }
     }
 
-    private string? FindMO2IniFile(string workingDir)
+    private string? FindMo2IniFile(string workingDir)
     {
         // Check for portable installation (ModOrganizer.ini in working directory)
         var portableIni = Path.Combine(workingDir, "ModOrganizer.ini");
