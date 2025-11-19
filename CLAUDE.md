@@ -324,6 +324,44 @@ For Fallout 4 specific operations, may need:
 
 ## Platform-Specific Considerations
 
+**REQUIREMENT**: All platform-specific code must be annotated with the appropriate platform attributes.
+
+### Platform Attribute Requirements
+
+Any code that uses platform-specific APIs (Registry, Windows-only file operations, etc.) **must** be marked with:
+
+```csharp
+[SupportedOSPlatform("windows")]
+public class ModManagerService : IModManagerService
+{
+    // Registry access and other Windows-specific operations
+}
+
+[SupportedOSPlatform("windows")]
+public async Task<string?> GetRegistryValueAsync(string keyPath)
+{
+    // Windows Registry access
+}
+```
+
+**WHY**: Platform attributes enable:
+- Compile-time warnings when platform-specific code is called from cross-platform code
+- Better trimming analysis and smaller published executables
+- Clear documentation of platform requirements
+- Protection against accidental use on unsupported platforms
+
+**Common Attributes**:
+- `[SupportedOSPlatform("windows")]` - Code only works on Windows
+- `[SupportedOSPlatform("windows7.0")]` - Requires specific Windows version
+- `[UnsupportedOSPlatform("browser")]` - Doesn't work in browser/WASM contexts
+
+**IMPORTANT**: Apply attributes at the most specific level:
+- If entire class is Windows-only, mark the class
+- If only specific methods use Windows APIs, mark those methods
+- If code conditionally uses platform-specific APIs, mark those code paths
+
+### Platform Notes
+
 - **Windows-only APIs**: Registry access, certain file operations
 - **Avalonia Cross-platform**: While Avalonia supports Linux/macOS, Fallout 4 is Windows-only, so focus on Windows first
 - **Mod Manager Integration**: MO2 and Vortex are Windows applications
