@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Platform;
@@ -30,7 +31,8 @@ public class ModManagerService : IModManagerService
     }
 
     /// <inheritdoc />
-    public async Task<ModManagerInfo> DetectModManagerAsync()
+    [SupportedOSPlatform("windows")]
+    public Task<ModManagerInfo> DetectModManagerAsync()
     {
         try
         {
@@ -42,9 +44,9 @@ public class ModManagerService : IModManagerService
                 switch (processInfo.Type)
                 {
                     case ModManagerType.ModOrganizer2:
-                        return DetectMO2FromProcess(processInfo);
+                        return Task.FromResult(DetectMO2FromProcess(processInfo));
                     case ModManagerType.Vortex:
-                        return DetectVortexFromProcess(processInfo);
+                        return Task.FromResult(DetectVortexFromProcess(processInfo));
                 }
             }
 
@@ -62,26 +64,27 @@ public class ModManagerService : IModManagerService
             }
 
             // Return "None" - standalone usage
-            return new ModManagerInfo
+            return Task.FromResult(new ModManagerInfo
             {
                 Type = ModManagerType.None,
                 ExecutablePath = string.Empty,
                 Version = "N/A"
-            };
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error detecting mod manager");
-            return new ModManagerInfo
+            return Task.FromResult(new ModManagerInfo
             {
                 Type = ModManagerType.None,
                 ExecutablePath = string.Empty,
                 Version = "N/A"
-            };
+            });
         }
     }
 
     /// <inheritdoc />
+    [SupportedOSPlatform("windows")]
     public virtual string? FindMO2Installation()
     {
         try
