@@ -37,13 +37,15 @@ public class ModManagerService : IModManagerService
             // First, check if we were launched from a mod manager via process tree
             var processInfo = _processService.FindModManager();
 
-            if (processInfo.Type == ModManagerType.ModOrganizer2)
+            if (processInfo != null)
             {
-                return await DetectMO2FromProcessAsync(processInfo);
-            }
-            else if (processInfo.Type == ModManagerType.Vortex)
-            {
-                return await DetectVortexFromProcessAsync(processInfo);
+                switch (processInfo.Type)
+                {
+                    case ModManagerType.ModOrganizer2:
+                        return DetectMO2FromProcess(processInfo);
+                    case ModManagerType.Vortex:
+                        return DetectVortexFromProcess(processInfo);
+                }
             }
 
             // Not launched from mod manager, but check if they're installed
@@ -387,7 +389,7 @@ public class ModManagerService : IModManagerService
         return null;
     }
 
-    private async Task<ModManagerInfo> DetectMO2FromProcessAsync(ModManagerInfo processInfo)
+    private ModManagerInfo DetectMO2FromProcess(ModManagerInfo processInfo)
     {
         try
         {
@@ -438,7 +440,7 @@ public class ModManagerService : IModManagerService
         }
     }
 
-    private async Task<ModManagerInfo> DetectVortexFromProcessAsync(ModManagerInfo processInfo)
+    private ModManagerInfo DetectVortexFromProcess(ModManagerInfo processInfo)
     {
         try
         {

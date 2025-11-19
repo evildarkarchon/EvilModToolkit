@@ -1,11 +1,21 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using Microsoft.Extensions.Logging;
 
 namespace EvilModToolkit.Services.Configuration;
+
+/// <summary>
+/// JSON serialization context for AppSettings (trim-safe).
+/// </summary>
+[JsonSerializable(typeof(AppSettings))]
+[JsonSourceGenerationOptions(WriteIndented = true, PropertyNameCaseInsensitive = true)]
+internal partial class AppSettingsJsonContext : JsonSerializerContext
+{
+}
 
 /// <summary>
 /// Service for persisting application settings to JSON.
@@ -16,16 +26,10 @@ public class SettingsService : ISettingsService
     private const string ApplicationName = "EvilModToolkit";
 
     private readonly ILogger<SettingsService> _logger;
-    private readonly JsonSerializerOptions _jsonOptions;
 
     public SettingsService(ILogger<SettingsService> logger)
     {
         _logger = logger;
-        _jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true
-        };
     }
 
     /// <inheritdoc />
@@ -42,7 +46,7 @@ public class SettingsService : ISettingsService
             }
 
             var json = await File.ReadAllTextAsync(settingsPath);
-            var settings = JsonSerializer.Deserialize<AppSettings>(json, _jsonOptions);
+            var settings = JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings);
 
             if (settings == null)
             {
@@ -74,7 +78,7 @@ public class SettingsService : ISettingsService
                 _logger.LogDebug("Created settings directory: {Directory}", directory);
             }
 
-            var json = JsonSerializer.Serialize(settings, _jsonOptions);
+            var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
             await File.WriteAllTextAsync(settingsPath, json);
 
             _logger.LogInformation("Settings saved successfully to {Path}", settingsPath);

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Management;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ namespace EvilModToolkit.Services.Platform;
 /// <summary>
 /// Service for collecting PC diagnostics (OS, RAM, CPU, GPU) using WMI.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class SystemInfoService : ISystemInfoService
 {
     private readonly ILogger<SystemInfoService> _logger;
