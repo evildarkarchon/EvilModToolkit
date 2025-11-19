@@ -101,7 +101,8 @@ public class BA2ArchiveService : IBA2ArchiveService
                     stream.WriteByte((byte)targetVersion);
                 }
 
-                _logger.LogInformation("Successfully patched BA2 from v{CurrentVersion} to v{TargetVersion}: {FilePath}",
+                _logger.LogInformation(
+                    "Successfully patched BA2 from v{CurrentVersion} to v{TargetVersion}: {FilePath}",
                     (byte)currentVersion, (byte)targetVersion, filePath);
 
                 return true;

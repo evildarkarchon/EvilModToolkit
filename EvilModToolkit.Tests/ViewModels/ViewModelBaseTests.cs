@@ -23,7 +23,9 @@ namespace EvilModToolkit.Tests.ViewModels
             public void PublicCancelOperation() => CancelOperation();
             public CancellationToken PublicCancellationToken => CancellationToken;
             public bool PublicTryExecute(Action action, ILogger? logger = null) => TryExecute(action, logger);
-            public Task<bool> PublicTryExecuteAsync(Func<Task> action, ILogger? logger = null) => TryExecuteAsync(action, logger);
+
+            public Task<bool> PublicTryExecuteAsync(Func<Task> action, ILogger? logger = null) =>
+                TryExecuteAsync(action, logger);
 
             public void PublicSetIsBusy(bool value) => IsBusy = value;
             public void PublicSetProgressPercentage(double value) => ProgressPercentage = value;

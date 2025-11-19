@@ -41,7 +41,8 @@ namespace EvilModToolkit.ViewModels
             ILogger<F4SEViewModel> logger)
         {
             _pluginService = pluginService ?? throw new ArgumentNullException(nameof(pluginService));
-            _gameDetectionService = gameDetectionService ?? throw new ArgumentNullException(nameof(gameDetectionService));
+            _gameDetectionService =
+                gameDetectionService ?? throw new ArgumentNullException(nameof(gameDetectionService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _allPlugins = new ObservableCollection<F4SePluginInfo>();
@@ -211,67 +212,68 @@ namespace EvilModToolkit.ViewModels
         private async Task ScanPluginsAsync()
         {
             if (!await TryExecuteAsync(async () =>
-            {
-                IsBusy = true;
-                SetStatus("Scanning F4SE plugins...");
-                ProgressPercentage = 0;
-                CreateCancellationTokenSource();
-
-                try
                 {
-                    _allPlugins.Clear();
-                    _filteredPlugins.Clear();
-                    SelectedPlugin = null;
+                    IsBusy = true;
+                    SetStatus("Scanning F4SE plugins...");
+                    ProgressPercentage = 0;
+                    CreateCancellationTokenSource();
 
-                    if (string.IsNullOrEmpty(PluginDirectory))
+                    try
                     {
-                        SetError("F4SE plugin directory not set. Please ensure Fallout 4 is installed.");
-                        _logger.LogWarning("Cannot scan: plugin directory not set");
-                        return;
-                    }
+                        _allPlugins.Clear();
+                        _filteredPlugins.Clear();
+                        SelectedPlugin = null;
 
-                    if (!Directory.Exists(PluginDirectory))
+                        if (string.IsNullOrEmpty(PluginDirectory))
+                        {
+                            SetError("F4SE plugin directory not set. Please ensure Fallout 4 is installed.");
+                            _logger.LogWarning("Cannot scan: plugin directory not set");
+                            return;
+                        }
+
+                        if (!Directory.Exists(PluginDirectory))
+                        {
+                            SetStatus($"F4SE plugin directory not found: {PluginDirectory}");
+                            _logger.LogWarning("Plugin directory does not exist: {PluginDirectory}", PluginDirectory);
+                            return;
+                        }
+
+                        _logger.LogInformation("Scanning directory: {PluginDirectory}", PluginDirectory);
+
+                        // Scan for plugins (synchronous operation, run on thread pool)
+                        var plugins = await Task.Run(() =>
+                                _pluginService.ScanDirectory(PluginDirectory, recursive: true),
+                            CancellationToken);
+
+                        _logger.LogInformation("Found {Count} DLL files", plugins.Count);
+
+                        // Add plugins to collection
+                        foreach (var plugin in plugins.OrderBy(p => p.FileName))
+                        {
+                            _allPlugins.Add(plugin);
+                        }
+
+                        // Apply filters to populate the filtered collection
+                        ApplyFilters();
+
+                        // Update statistics
+                        this.RaisePropertyChanged(nameof(TotalPluginCount));
+                        this.RaisePropertyChanged(nameof(OgOnlyCount));
+                        this.RaisePropertyChanged(nameof(NgOnlyCount));
+                        this.RaisePropertyChanged(nameof(UniversalCount));
+                        this.RaisePropertyChanged(nameof(IncompatibleCount));
+
+                        SetStatus($"Scan complete. Found {TotalPluginCount} plugins.");
+                        ProgressPercentage = 100;
+                        _logger.LogInformation(
+                            "Scan complete: {TotalCount} total, {OgOnly} OG-only, {NgOnly} NG-only, {Universal} universal, {Incompatible} incompatible",
+                            TotalPluginCount, OgOnlyCount, NgOnlyCount, UniversalCount, IncompatibleCount);
+                    }
+                    finally
                     {
-                        SetStatus($"F4SE plugin directory not found: {PluginDirectory}");
-                        _logger.LogWarning("Plugin directory does not exist: {PluginDirectory}", PluginDirectory);
-                        return;
+                        IsBusy = false;
                     }
-
-                    _logger.LogInformation("Scanning directory: {PluginDirectory}", PluginDirectory);
-
-                    // Scan for plugins (synchronous operation, run on thread pool)
-                    var plugins = await Task.Run(() =>
-                        _pluginService.ScanDirectory(PluginDirectory, recursive: true),
-                        CancellationToken);
-
-                    _logger.LogInformation("Found {Count} DLL files", plugins.Count);
-
-                    // Add plugins to collection
-                    foreach (var plugin in plugins.OrderBy(p => p.FileName))
-                    {
-                        _allPlugins.Add(plugin);
-                    }
-
-                    // Apply filters to populate the filtered collection
-                    ApplyFilters();
-
-                    // Update statistics
-                    this.RaisePropertyChanged(nameof(TotalPluginCount));
-                    this.RaisePropertyChanged(nameof(OgOnlyCount));
-                    this.RaisePropertyChanged(nameof(NgOnlyCount));
-                    this.RaisePropertyChanged(nameof(UniversalCount));
-                    this.RaisePropertyChanged(nameof(IncompatibleCount));
-
-                    SetStatus($"Scan complete. Found {TotalPluginCount} plugins.");
-                    ProgressPercentage = 100;
-                    _logger.LogInformation("Scan complete: {TotalCount} total, {OgOnly} OG-only, {NgOnly} NG-only, {Universal} universal, {Incompatible} incompatible",
-                        TotalPluginCount, OgOnlyCount, NgOnlyCount, UniversalCount, IncompatibleCount);
-                }
-                finally
-                {
-                    IsBusy = false;
-                }
-            }, _logger))
+                }, _logger))
             {
                 _logger.LogError("Failed to scan F4SE plugins");
             }

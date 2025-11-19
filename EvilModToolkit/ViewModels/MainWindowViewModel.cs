@@ -107,6 +107,7 @@ namespace EvilModToolkit.ViewModels
                     var tabName = GetTabName(value);
                     _logger.LogDebug("Navigating to tab: {TabIndex} ({TabName})", value, tabName);
                 }
+
                 this.RaiseAndSetIfChanged(ref _selectedTabIndex, value);
             }
         }

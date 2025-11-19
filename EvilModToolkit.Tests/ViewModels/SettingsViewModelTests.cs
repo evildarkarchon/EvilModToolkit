@@ -329,10 +329,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
             var saveTaskSource = new TaskCompletionSource<bool>();
             _settingsService.SaveSettingsAsync(Arg.Any<AppSettings>())
-                .Returns(async callInfo =>
-                {
-                    await saveTaskSource.Task;
-                });
+                .Returns(async callInfo => { await saveTaskSource.Task; });
 
             var viewModel = new SettingsViewModel(_settingsService, _dialogService, _logger);
             await Task.Delay(50);

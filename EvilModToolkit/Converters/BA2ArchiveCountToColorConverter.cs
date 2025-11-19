@@ -22,10 +22,12 @@ namespace EvilModToolkit.Converters
     public class BA2ArchiveCountToColorConverter : IValueConverter
     {
         // Color definitions matching the severity levels from the original toolkit
-        private static readonly IBrush GreenBrush = new SolidColorBrush(Color.FromRgb(40, 167, 69));   // Success green
-        private static readonly IBrush YellowBrush = new SolidColorBrush(Color.FromRgb(255, 193, 7));  // Warning yellow
-        private static readonly IBrush RedBrush = new SolidColorBrush(Color.FromRgb(220, 53, 69));     // Danger red
-        private static readonly IBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(108, 117, 125)); // Gray (fallback)
+        private static readonly IBrush GreenBrush = new SolidColorBrush(Color.FromRgb(40, 167, 69)); // Success green
+        private static readonly IBrush YellowBrush = new SolidColorBrush(Color.FromRgb(255, 193, 7)); // Warning yellow
+        private static readonly IBrush RedBrush = new SolidColorBrush(Color.FromRgb(220, 53, 69)); // Danger red
+
+        private static readonly IBrush
+            DefaultBrush = new SolidColorBrush(Color.FromRgb(108, 117, 125)); // Gray (fallback)
 
         /// <summary>
         /// Converts a BA2 archive count to a color brush based on the limit.

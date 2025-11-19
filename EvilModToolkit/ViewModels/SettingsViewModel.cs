@@ -227,26 +227,26 @@ namespace EvilModToolkit.ViewModels
         private async Task LoadSettingsAsync()
         {
             if (!await TryExecuteAsync(async () =>
-            {
-                _logger.LogInformation("Loading application settings...");
-                var settings = await _settingsService.LoadSettingsAsync();
+                {
+                    _logger.LogInformation("Loading application settings...");
+                    var settings = await _settingsService.LoadSettingsAsync();
 
-                // Update all properties from loaded settings
-                GamePathOverride = settings.GamePathOverride;
-                MO2PathOverride = settings.MO2PathOverride;
-                VortexPathOverride = settings.VortexPathOverride;
-                LastF4SEScanDirectory = settings.LastF4SEScanDirectory;
-                LastBA2PatchDirectory = settings.LastBA2PatchDirectory;
-                ScanF4SERecursively = settings.ScanF4SERecursively;
-                WindowWidth = settings.WindowWidth;
-                WindowHeight = settings.WindowHeight;
-                ShowHiddenFiles = settings.ShowHiddenFiles;
-                Theme = settings.Theme;
-                LogLevel = settings.LogLevel;
+                    // Update all properties from loaded settings
+                    GamePathOverride = settings.GamePathOverride;
+                    MO2PathOverride = settings.MO2PathOverride;
+                    VortexPathOverride = settings.VortexPathOverride;
+                    LastF4SEScanDirectory = settings.LastF4SEScanDirectory;
+                    LastBA2PatchDirectory = settings.LastBA2PatchDirectory;
+                    ScanF4SERecursively = settings.ScanF4SERecursively;
+                    WindowWidth = settings.WindowWidth;
+                    WindowHeight = settings.WindowHeight;
+                    ShowHiddenFiles = settings.ShowHiddenFiles;
+                    Theme = settings.Theme;
+                    LogLevel = settings.LogLevel;
 
-                _logger.LogInformation("Settings loaded successfully from {SettingsPath}",
-                    _settingsService.GetSettingsFilePath());
-            }, _logger))
+                    _logger.LogInformation("Settings loaded successfully from {SettingsPath}",
+                        _settingsService.GetSettingsFilePath());
+                }, _logger))
             {
                 _logger.LogError("Failed to load settings, using defaults");
             }
@@ -261,43 +261,43 @@ namespace EvilModToolkit.ViewModels
             try
             {
                 if (!await TryExecuteAsync(async () =>
-                {
-                    IsBusy = true;
-                    SetStatus("Saving settings...");
-
-                    // Create AppSettings object from current property values
-                    var settings = new AppSettings
                     {
-                        GamePathOverride = GamePathOverride,
-                        MO2PathOverride = MO2PathOverride,
-                        VortexPathOverride = VortexPathOverride,
-                        LastF4SEScanDirectory = LastF4SEScanDirectory,
-                        LastBA2PatchDirectory = LastBA2PatchDirectory,
-                        ScanF4SERecursively = ScanF4SERecursively,
-                        WindowWidth = WindowWidth,
-                        WindowHeight = WindowHeight,
-                        ShowHiddenFiles = ShowHiddenFiles,
-                        Theme = Theme,
-                        LogLevel = LogLevel
-                    };
+                        IsBusy = true;
+                        SetStatus("Saving settings...");
 
-                    // Validate settings before saving
-                    var validationErrors = settings.Validate();
-                    if (validationErrors.Count > 0)
-                    {
-                        var errorMessage = $"Invalid settings: {string.Join(", ", validationErrors)}";
-                        SetError(errorMessage);
-                        _logger.LogWarning("Settings validation failed: {Errors}", errorMessage);
-                        return;
-                    }
+                        // Create AppSettings object from current property values
+                        var settings = new AppSettings
+                        {
+                            GamePathOverride = GamePathOverride,
+                            MO2PathOverride = MO2PathOverride,
+                            VortexPathOverride = VortexPathOverride,
+                            LastF4SEScanDirectory = LastF4SEScanDirectory,
+                            LastBA2PatchDirectory = LastBA2PatchDirectory,
+                            ScanF4SERecursively = ScanF4SERecursively,
+                            WindowWidth = WindowWidth,
+                            WindowHeight = WindowHeight,
+                            ShowHiddenFiles = ShowHiddenFiles,
+                            Theme = Theme,
+                            LogLevel = LogLevel
+                        };
 
-                    // Save settings to disk
-                    await _settingsService.SaveSettingsAsync(settings);
+                        // Validate settings before saving
+                        var validationErrors = settings.Validate();
+                        if (validationErrors.Count > 0)
+                        {
+                            var errorMessage = $"Invalid settings: {string.Join(", ", validationErrors)}";
+                            SetError(errorMessage);
+                            _logger.LogWarning("Settings validation failed: {Errors}", errorMessage);
+                            return;
+                        }
 
-                    SetStatus("Settings saved successfully");
-                    _logger.LogInformation("Settings saved to {SettingsPath}",
-                        _settingsService.GetSettingsFilePath());
-                }, _logger))
+                        // Save settings to disk
+                        await _settingsService.SaveSettingsAsync(settings);
+
+                        SetStatus("Settings saved successfully");
+                        _logger.LogInformation("Settings saved to {SettingsPath}",
+                            _settingsService.GetSettingsFilePath());
+                    }, _logger))
                 {
                     _logger.LogError("Failed to save settings");
                 }
@@ -315,28 +315,28 @@ namespace EvilModToolkit.ViewModels
         private void ResetDefaults()
         {
             if (!TryExecute(() =>
-            {
-                _logger.LogInformation("Resetting settings to defaults...");
+                {
+                    _logger.LogInformation("Resetting settings to defaults...");
 
-                // Get default settings from service
-                var defaults = _settingsService.GetDefaultSettings();
+                    // Get default settings from service
+                    var defaults = _settingsService.GetDefaultSettings();
 
-                // Update all properties to default values
-                GamePathOverride = defaults.GamePathOverride;
-                MO2PathOverride = defaults.MO2PathOverride;
-                VortexPathOverride = defaults.VortexPathOverride;
-                LastF4SEScanDirectory = defaults.LastF4SEScanDirectory;
-                LastBA2PatchDirectory = defaults.LastBA2PatchDirectory;
-                ScanF4SERecursively = defaults.ScanF4SERecursively;
-                WindowWidth = defaults.WindowWidth;
-                WindowHeight = defaults.WindowHeight;
-                ShowHiddenFiles = defaults.ShowHiddenFiles;
-                Theme = defaults.Theme;
-                LogLevel = defaults.LogLevel;
+                    // Update all properties to default values
+                    GamePathOverride = defaults.GamePathOverride;
+                    MO2PathOverride = defaults.MO2PathOverride;
+                    VortexPathOverride = defaults.VortexPathOverride;
+                    LastF4SEScanDirectory = defaults.LastF4SEScanDirectory;
+                    LastBA2PatchDirectory = defaults.LastBA2PatchDirectory;
+                    ScanF4SERecursively = defaults.ScanF4SERecursively;
+                    WindowWidth = defaults.WindowWidth;
+                    WindowHeight = defaults.WindowHeight;
+                    ShowHiddenFiles = defaults.ShowHiddenFiles;
+                    Theme = defaults.Theme;
+                    LogLevel = defaults.LogLevel;
 
-                SetStatus("Settings reset to defaults (not saved yet - click Save to persist)");
-                _logger.LogInformation("Settings reset to defaults");
-            }, _logger))
+                    SetStatus("Settings reset to defaults (not saved yet - click Save to persist)");
+                    _logger.LogInformation("Settings reset to defaults");
+                }, _logger))
             {
                 _logger.LogError("Failed to reset settings to defaults");
             }

@@ -33,6 +33,7 @@ public class BA2ArchiveServiceTests : IDisposable
                 if (fileInfo.IsReadOnly)
                     fileInfo.IsReadOnly = false;
             }
+
             Directory.Delete(_testDirectory, true);
         }
     }

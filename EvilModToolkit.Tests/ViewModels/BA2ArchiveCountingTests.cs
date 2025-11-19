@@ -475,7 +475,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _ba2ArchiveService.GetArchiveInfo(ba2File).Returns(new BA2ArchiveInfo
             {
                 FilePath = ba2File,
-                IsValid = false,  // Invalid archive
+                IsValid = false, // Invalid archive
                 Type = BA2Type.Unknown,
                 Version = BA2Version.Unknown
             });
@@ -518,7 +518,7 @@ namespace EvilModToolkit.Tests.ViewModels
             {
                 FilePath = ba2File,
                 IsValid = true,
-                Type = BA2Type.Unknown,  // Unknown type
+                Type = BA2Type.Unknown, // Unknown type
                 Version = BA2Version.V1
             });
 
@@ -743,6 +743,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 File.WriteAllText(filePath, "mock ba2 content");
                 files.Add(filePath);
             }
+
             return files;
         }
 

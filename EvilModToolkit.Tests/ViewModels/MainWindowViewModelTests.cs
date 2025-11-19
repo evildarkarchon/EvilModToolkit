@@ -60,7 +60,8 @@ namespace EvilModToolkit.Tests.ViewModels
 
             // Setup default return values for services to prevent null reference exceptions
             _gameDetectionService.DetectGame().Returns(new GameInfo { IsInstalled = false });
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
             _settingsService.LoadSettingsAsync().Returns(Task.FromResult(new AppSettings()));
             _settingsService.GetDefaultSettings().Returns(new AppSettings());
@@ -70,7 +71,8 @@ namespace EvilModToolkit.Tests.ViewModels
         /// Creates real child ViewModels with mocked dependencies.
         /// This approach is necessary because ViewModels are concrete classes.
         /// </summary>
-        private (OverviewViewModel overview, F4SEViewModel f4se, SettingsViewModel settings, ToolsViewModel tools) CreateChildViewModels()
+        private (OverviewViewModel overview, F4SEViewModel f4se, SettingsViewModel settings, ToolsViewModel tools)
+            CreateChildViewModels()
         {
             var overview = new OverviewViewModel(
                 _gameDetectionService,

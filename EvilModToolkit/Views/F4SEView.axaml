@@ -9,7 +9,7 @@
              x:DataType="vm:F4SEViewModel">
 
     <Design.DataContext>
-        <vm:F4SEViewModel/>
+        <vm:F4SEViewModel />
     </Design.DataContext>
 
     <DockPanel Margin="20">
@@ -17,16 +17,16 @@
         <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
             <StackPanel Grid.Column="0" Spacing="5">
                 <TextBlock Text="F4SE Plugin Scanner"
-                          FontSize="24"
-                          FontWeight="Bold"/>
+                           FontSize="24"
+                           FontWeight="Bold" />
                 <TextBlock Text="{Binding PluginDirectory}"
-                          Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
             </StackPanel>
             <Button Grid.Column="1"
                     Content="Scan Plugins"
                     Command="{Binding ScanPluginsCommand}"
                     Padding="20,8"
-                    VerticalAlignment="Top"/>
+                    VerticalAlignment="Top" />
         </Grid>
 
         <!-- Filter Section -->
@@ -38,20 +38,20 @@
                 CornerRadius="5">
             <StackPanel Spacing="10">
                 <TextBlock Text="Filters"
-                          FontSize="16"
-                          FontWeight="SemiBold"/>
+                           FontSize="16"
+                           FontWeight="SemiBold" />
                 <WrapPanel>
                     <CheckBox Content="OG Only"
-                             IsChecked="{Binding ShowOgOnly}"
-                             Margin="0,0,15,0"/>
+                              IsChecked="{Binding ShowOgOnly}"
+                              Margin="0,0,15,0" />
                     <CheckBox Content="NG Only"
-                             IsChecked="{Binding ShowNgOnly}"
-                             Margin="0,0,15,0"/>
+                              IsChecked="{Binding ShowNgOnly}"
+                              Margin="0,0,15,0" />
                     <CheckBox Content="Universal"
-                             IsChecked="{Binding ShowUniversal}"
-                             Margin="0,0,15,0"/>
+                              IsChecked="{Binding ShowUniversal}"
+                              Margin="0,0,15,0" />
                     <CheckBox Content="Incompatible/Unknown"
-                             IsChecked="{Binding ShowIncompatible}"/>
+                              IsChecked="{Binding ShowIncompatible}" />
                 </WrapPanel>
             </StackPanel>
         </Border>
@@ -66,45 +66,45 @@
             <Grid ColumnDefinitions="*,*,*,*,*">
                 <StackPanel Grid.Column="0" Spacing="5">
                     <TextBlock Text="Total"
-                              FontSize="12"
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                     <TextBlock Text="{Binding TotalPluginCount}"
-                              FontSize="24"
-                              FontWeight="Bold"/>
+                               FontSize="24"
+                               FontWeight="Bold" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Spacing="5">
                     <TextBlock Text="OG Only"
-                              FontSize="12"
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                     <TextBlock Text="{Binding OgOnlyCount}"
-                              FontSize="24"
-                              FontWeight="Bold"/>
+                               FontSize="24"
+                               FontWeight="Bold" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Spacing="5">
                     <TextBlock Text="NG Only"
-                              FontSize="12"
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                     <TextBlock Text="{Binding NgOnlyCount}"
-                              FontSize="24"
-                              FontWeight="Bold"/>
+                               FontSize="24"
+                               FontWeight="Bold" />
                 </StackPanel>
                 <StackPanel Grid.Column="3" Spacing="5">
                     <TextBlock Text="Universal"
-                              FontSize="12"
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                     <TextBlock Text="{Binding UniversalCount}"
-                              FontSize="24"
-                              FontWeight="Bold"
-                              Foreground="Green"/>
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="Green" />
                 </StackPanel>
                 <StackPanel Grid.Column="4" Spacing="5">
                     <TextBlock Text="Incompatible"
-                              FontSize="12"
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                     <TextBlock Text="{Binding IncompatibleCount}"
-                              FontSize="24"
-                              FontWeight="Bold"
-                              Foreground="Orange"/>
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="Orange" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -112,21 +112,21 @@
         <!-- Progress and Status -->
         <StackPanel DockPanel.Dock="Bottom" Margin="0,15,0,0" Spacing="10">
             <ProgressBar Value="{Binding ProgressPercentage}"
-                        IsVisible="{Binding IsBusy}"
-                        Height="6"/>
+                         IsVisible="{Binding IsBusy}"
+                         Height="6" />
             <TextBlock Text="{Binding StatusMessage}"
-                      IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
-                      Foreground="{DynamicResource SystemAccentColor}"/>
+                       IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                       Foreground="{DynamicResource SystemAccentColor}" />
             <TextBlock Text="{Binding ErrorMessage}"
-                      IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
-                      Foreground="Red"
-                      TextWrapping="Wrap"/>
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                       Foreground="Red"
+                       TextWrapping="Wrap" />
         </StackPanel>
 
         <!-- Plugin List - fills remaining space -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
-                     HorizontalScrollBarVisibility="Disabled"
-                     Margin="0,0,0,15">
+                      HorizontalScrollBarVisibility="Disabled"
+                      Margin="0,0,0,15">
             <StackPanel>
                 <!-- Column Headers -->
                 <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
@@ -134,11 +134,11 @@
                         Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                         Padding="10,8">
                     <Grid ColumnDefinitions="2*,*,100,100,*">
-                        <TextBlock Grid.Column="0" Text="Plugin Name" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="1" Text="Version" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="2" Text="OG Support" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="3" Text="NG Support" FontWeight="Bold"/>
-                        <TextBlock Grid.Column="4" Text="Compatibility" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="0" Text="Plugin Name" FontWeight="Bold" />
+                        <TextBlock Grid.Column="1" Text="Version" FontWeight="Bold" />
+                        <TextBlock Grid.Column="2" Text="OG Support" FontWeight="Bold" />
+                        <TextBlock Grid.Column="3" Text="NG Support" FontWeight="Bold" />
+                        <TextBlock Grid.Column="4" Text="Compatibility" FontWeight="Bold" />
                     </Grid>
                 </Border>
 
@@ -150,11 +150,12 @@
                                     BorderThickness="0,0,0,1"
                                     Padding="10,8">
                                 <Grid ColumnDefinitions="2*,*,100,100,*">
-                                    <TextBlock Grid.Column="0" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Version}"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding SupportsOg}"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding SupportsNg}"/>
-                                    <TextBlock Grid.Column="4" Text="{Binding Compatibility}"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding FileName}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Version}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding SupportsOg}" />
+                                    <TextBlock Grid.Column="3" Text="{Binding SupportsNg}" />
+                                    <TextBlock Grid.Column="4" Text="{Binding Compatibility}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>

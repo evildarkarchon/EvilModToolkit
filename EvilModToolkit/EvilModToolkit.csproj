@@ -1,58 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <!-- Treat platform-specific warnings as errors -->
-    <WarningsAsErrors>CA1416,CS8620</WarningsAsErrors>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <!-- Treat platform-specific warnings as errors -->
+        <WarningsAsErrors>CA1416,CS8620</WarningsAsErrors>
+    </PropertyGroup>
 
-  <!-- Trimming configuration for smaller standalone executables -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <!-- Enable IL trimming to remove unused code -->
-    <PublishTrimmed>true</PublishTrimmed>
+    <!-- Trimming configuration for smaller standalone executables -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <!-- Enable IL trimming to remove unused code -->
+        <PublishTrimmed>true</PublishTrimmed>
 
-    <!-- Trim mode: 'link' removes unused assemblies and members (more aggressive) -->
-    <!-- 'copyused' only removes unused assemblies (safer fallback if issues occur) -->
-    <TrimMode>link</TrimMode>
+        <!-- Trim mode: 'link' removes unused assemblies and members (more aggressive) -->
+        <!-- 'copyused' only removes unused assemblies (safer fallback if issues occur) -->
+        <TrimMode>link</TrimMode>
 
-    <!-- Enable single-file publishing (optional, bundles everything into one .exe) -->
-    <!-- <PublishSingleFile>true</PublishSingleFile> -->
+        <!-- Enable single-file publishing (optional, bundles everything into one .exe) -->
+        <!-- <PublishSingleFile>true</PublishSingleFile> -->
 
-    <!-- Enable ReadyToRun compilation for faster startup (optional) -->
-    <!-- <PublishReadyToRun>true</PublishReadyToRun> -->
+        <!-- Enable ReadyToRun compilation for faster startup (optional) -->
+        <!-- <PublishReadyToRun>true</PublishReadyToRun> -->
 
-    <!-- Suppress trim analysis warnings from third-party libraries (ReactiveUI, etc.) -->
-    <!-- Only suppress after verifying YOUR code has no trim warnings -->
-    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-  </PropertyGroup>
+        <!-- Suppress trim analysis warnings from third-party libraries (ReactiveUI, etc.) -->
+        <!-- Only suppress after verifying YOUR code has no trim warnings -->
+        <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Models\"/>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.9" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.9" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.8" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.8">
-      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
-    <PackageReference Include="PeNet" Version="5.1.0" />
-    <PackageReference Include="System.Management" Version="10.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.9"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.9"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.9"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.9" />
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.9">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0"/>
+        <PackageReference Include="PeNet" Version="5.1.0"/>
+        <PackageReference Include="System.Management" Version="10.0.0"/>
+    </ItemGroup>
 </Project>

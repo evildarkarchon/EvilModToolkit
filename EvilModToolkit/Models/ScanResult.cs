@@ -41,7 +41,7 @@ public class ScanResult
     /// <summary>
     /// Suggested solution type, or a custom solution string
     /// </summary>
-    public object? Solution { get; init; }  // Can be SolutionType enum or string
+    public object? Solution { get; init; } // Can be SolutionType enum or string
 
     /// <summary>
     /// Optional list of related files with metadata (size/count, path)
@@ -106,14 +106,18 @@ public class ScanResult
             SolutionType.ArchiveOrDeleteFile => "These files should either be archived or deleted.",
             SolutionType.ArchiveOrDeleteFolder => "These folders should either be archived or deleted.",
             SolutionType.DeleteFile => "This file should be deleted.",
-            SolutionType.ConvertDeleteOrIgnoreFile => "This file may need to be converted and relevant files updated for the new name.\nOtherwise it can likely be deleted or ignored.",
+            SolutionType.ConvertDeleteOrIgnoreFile =>
+                "This file may need to be converted and relevant files updated for the new name.\nOtherwise it can likely be deleted or ignored.",
             SolutionType.DeleteOrIgnoreFile => "It can either be deleted or ignored.",
             SolutionType.DeleteOrIgnoreFolder => "It can either be deleted or ignored.",
-            SolutionType.RenameArchive => "Archives must be named the same as a plugin with an added suffix or added to an INI.",
+            SolutionType.RenameArchive =>
+                "Archives must be named the same as a plugin with an added suffix or added to an INI.",
             SolutionType.DownloadMod => "Download the mod here:",
-            SolutionType.VerifyFiles => "Verify files with Steam or reinstall the game.\nIf you downgraded the game you will need to do so again afterward.",
+            SolutionType.VerifyFiles =>
+                "Verify files with Steam or reinstall the game.\nIf you downgraded the game you will need to do so again afterward.",
             SolutionType.UnknownFormat => "If this file type is expected here, please report it.",
-            SolutionType.ComplexSorterFix => "If you are using xEdit v4.1.5g+, all references to 'Addon Index' in this file should be updated to 'Parent Combination Index'.",
+            SolutionType.ComplexSorterFix =>
+                "If you are using xEdit v4.1.5g+, all references to 'Addon Index' in this file should be updated to 'Parent Combination Index'.",
             _ => string.Empty
         };
     }

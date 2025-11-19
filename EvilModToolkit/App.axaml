@@ -4,22 +4,22 @@
              xmlns:local="using:EvilModToolkit"
              xmlns:converters="using:EvilModToolkit.Converters"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <local:ViewLocator />
     </Application.DataTemplates>
 
     <Application.Resources>
         <!-- Value Converters -->
-        <converters:EnumToStringConverter x:Key="EnumToStringConverter"/>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-        <converters:SeverityToColorConverter x:Key="SeverityToColorConverter"/>
-        <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
-        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
-        <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
-        <converters:BA2ArchiveCountToColorConverter x:Key="BA2ArchiveCountToColorConverter"/>
+        <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:SeverityToColorConverter x:Key="SeverityToColorConverter" />
+        <converters:BoolToStringConverter x:Key="BoolToStringConverter" />
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+        <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+        <converters:BA2ArchiveCountToColorConverter x:Key="BA2ArchiveCountToColorConverter" />
     </Application.Resources>
 
     <Application.Styles>

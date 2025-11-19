@@ -52,7 +52,8 @@ namespace EvilModToolkit.ViewModels
             ILogger<OverviewViewModel> logger,
             bool autoRefresh = true)
         {
-            _gameDetectionService = gameDetectionService ?? throw new ArgumentNullException(nameof(gameDetectionService));
+            _gameDetectionService =
+                gameDetectionService ?? throw new ArgumentNullException(nameof(gameDetectionService));
             _modManagerService = modManagerService ?? throw new ArgumentNullException(nameof(modManagerService));
             _systemInfoService = systemInfoService ?? throw new ArgumentNullException(nameof(systemInfoService));
             _ba2ArchiveService = ba2ArchiveService ?? throw new ArgumentNullException(nameof(ba2ArchiveService));
@@ -205,65 +206,65 @@ namespace EvilModToolkit.ViewModels
         private async Task RefreshAsync()
         {
             if (!await TryExecuteAsync(async () =>
-            {
-                IsBusy = true;
-                SetStatus("Refreshing information...");
-                Problems.Clear();
-
-                try
                 {
-                    // Detect game installation
-                    _logger.LogInformation("Detecting Fallout 4 installation...");
-                    GameInfo = await Task.Run(() => _gameDetectionService.DetectGame());
+                    IsBusy = true;
+                    SetStatus("Refreshing information...");
+                    Problems.Clear();
 
-                    if (GameInfo == null || !GameInfo.IsInstalled)
+                    try
                     {
-                        _logger.LogWarning("Fallout 4 installation not detected");
-                        Problems.Add(new ScanResult(
-                            type: ProblemType.FileNotFound,
-                            path: string.Empty,
-                            relativePath: string.Empty,
-                            summary: "Fallout 4 installation not detected. Please ensure the game is installed.",
-                            severity: SeverityLevel.Error
-                        ));
+                        // Detect game installation
+                        _logger.LogInformation("Detecting Fallout 4 installation...");
+                        GameInfo = await Task.Run(() => _gameDetectionService.DetectGame());
+
+                        if (GameInfo == null || !GameInfo.IsInstalled)
+                        {
+                            _logger.LogWarning("Fallout 4 installation not detected");
+                            Problems.Add(new ScanResult(
+                                type: ProblemType.FileNotFound,
+                                path: string.Empty,
+                                relativePath: string.Empty,
+                                summary: "Fallout 4 installation not detected. Please ensure the game is installed.",
+                                severity: SeverityLevel.Error
+                            ));
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Fallout 4 detected at: {InstallPath}", GameInfo.InstallPath);
+
+                            // Check for F4SE
+                            await DetectF4SeAsync();
+
+                            // Scan BA2 archives
+                            await ScanBA2ArchivesAsync();
+                        }
+
+                        // Detect mod manager
+                        _logger.LogInformation("Detecting mod manager...");
+                        ModManagerInfo = await _modManagerService.DetectModManagerAsync();
+
+                        if (ModManagerInfo != null && ModManagerInfo.Type != ModManagerType.None)
+                        {
+                            _logger.LogInformation("Mod manager detected: {Type} at {ExecutablePath}",
+                                ModManagerInfo.Type, ModManagerInfo.ExecutablePath);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("No mod manager detected (running standalone)");
+                        }
+
+                        // Get system information
+                        _logger.LogInformation("Gathering system information...");
+                        SystemInfo = await _systemInfoService.GetSystemInfoAsync();
+
+                        SetStatus("Refresh complete");
+                        _logger.LogInformation("Overview refresh completed successfully");
                     }
-                    else
+                    finally
                     {
-                        _logger.LogInformation("Fallout 4 detected at: {InstallPath}", GameInfo.InstallPath);
-
-                        // Check for F4SE
-                        await DetectF4SeAsync();
-
-                        // Scan BA2 archives
-                        await ScanBA2ArchivesAsync();
+                        IsBusy = false;
                     }
-
-                    // Detect mod manager
-                    _logger.LogInformation("Detecting mod manager...");
-                    ModManagerInfo = await _modManagerService.DetectModManagerAsync();
-
-                    if (ModManagerInfo != null && ModManagerInfo.Type != ModManagerType.None)
-                    {
-                        _logger.LogInformation("Mod manager detected: {Type} at {ExecutablePath}",
-                            ModManagerInfo.Type, ModManagerInfo.ExecutablePath);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("No mod manager detected (running standalone)");
-                    }
-
-                    // Get system information
-                    _logger.LogInformation("Gathering system information...");
-                    SystemInfo = await _systemInfoService.GetSystemInfoAsync();
-
-                    SetStatus("Refresh complete");
-                    _logger.LogInformation("Overview refresh completed successfully");
-                }
-                finally
-                {
-                    IsBusy = false;
-                }
-            }, _logger))
+                }, _logger))
             {
                 _logger.LogError("Failed to refresh overview information");
             }
@@ -308,7 +309,8 @@ namespace EvilModToolkit.ViewModels
                         type: ProblemType.FileNotFound,
                         path: GameInfo.InstallPath,
                         relativePath: "f4se_loader.exe",
-                        summary: "F4SE (Fallout 4 Script Extender) is not installed. Many mods require F4SE to function.",
+                        summary:
+                        "F4SE (Fallout 4 Script Extender) is not installed. Many mods require F4SE to function.",
                         severity: SeverityLevel.Warning
                     ));
 
@@ -409,7 +411,8 @@ namespace EvilModToolkit.ViewModels
                 // Raise property changed for the total count
                 this.RaisePropertyChanged(nameof(BA2CountTotal));
 
-                _logger.LogInformation("BA2 scan complete: GNRL={General}, DX10={Texture}, Total={Total}, v1={V1}, v7/8={V7V8}, Unreadable={Unreadable}",
+                _logger.LogInformation(
+                    "BA2 scan complete: GNRL={General}, DX10={Texture}, Total={Total}, v1={V1}, v7/8={V7V8}, Unreadable={Unreadable}",
                     BA2CountGeneral, BA2CountTexture, BA2CountTotal, BA2CountV1, BA2CountV7V8, BA2CountUnreadable);
             }
             catch (Exception ex)

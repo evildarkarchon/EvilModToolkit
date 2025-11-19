@@ -67,7 +67,8 @@ public class SystemInfoService : ISystemInfoService
     {
         try
         {
-            using var searcher = new ManagementObjectSearcher("SELECT Caption, BuildNumber, OSArchitecture FROM Win32_OperatingSystem");
+            using var searcher =
+                new ManagementObjectSearcher("SELECT Caption, BuildNumber, OSArchitecture FROM Win32_OperatingSystem");
             using var results = searcher.Get();
 
             var os = results.Cast<ManagementObject>().FirstOrDefault();

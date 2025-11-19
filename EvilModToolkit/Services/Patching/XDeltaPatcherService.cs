@@ -249,7 +249,8 @@ public class XDeltaPatcherService : IXDeltaPatcherService
     }
 
     /// <inheritdoc />
-    public async Task<(bool IsValid, string? ErrorMessage)> ValidatePatchAsync(string sourceFilePath, string patchFilePath)
+    public async Task<(bool IsValid, string? ErrorMessage)> ValidatePatchAsync(string sourceFilePath,
+        string patchFilePath)
     {
         // Check if source file exists
         if (!File.Exists(sourceFilePath))
@@ -329,7 +330,8 @@ public class XDeltaPatcherService : IXDeltaPatcherService
 
             if (driveInfo.AvailableFreeSpace < requiredSpace)
             {
-                return (false, $"Insufficient disk space. Required: {requiredSpace / (1024 * 1024)} MB, Available: {driveInfo.AvailableFreeSpace / (1024 * 1024)} MB");
+                return (false,
+                    $"Insufficient disk space. Required: {requiredSpace / (1024 * 1024)} MB, Available: {driveInfo.AvailableFreeSpace / (1024 * 1024)} MB");
             }
         }
         catch (Exception ex)

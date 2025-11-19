@@ -118,10 +118,12 @@ public class AppSettings
         if (!string.IsNullOrWhiteSpace(GamePathOverride) && !Directory.Exists(GamePathOverride))
             errors.Add($"Game path override does not exist: {GamePathOverride}");
 
-        if (!string.IsNullOrWhiteSpace(MO2PathOverride) && !File.Exists(MO2PathOverride) && !Directory.Exists(MO2PathOverride))
+        if (!string.IsNullOrWhiteSpace(MO2PathOverride) && !File.Exists(MO2PathOverride) &&
+            !Directory.Exists(MO2PathOverride))
             errors.Add($"MO2 path override does not exist: {MO2PathOverride}");
 
-        if (!string.IsNullOrWhiteSpace(VortexPathOverride) && !File.Exists(VortexPathOverride) && !Directory.Exists(VortexPathOverride))
+        if (!string.IsNullOrWhiteSpace(VortexPathOverride) && !File.Exists(VortexPathOverride) &&
+            !Directory.Exists(VortexPathOverride))
             errors.Add($"Vortex path override does not exist: {VortexPathOverride}");
 
         return errors;

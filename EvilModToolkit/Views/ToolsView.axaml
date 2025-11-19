@@ -9,15 +9,15 @@
              x:DataType="vm:ToolsViewModel">
 
     <Design.DataContext>
-        <vm:ToolsViewModel/>
+        <vm:ToolsViewModel />
     </Design.DataContext>
 
     <ScrollViewer>
         <StackPanel Margin="20" Spacing="20">
             <!-- Header -->
             <TextBlock Text="Tools &amp; Patchers"
-                      FontSize="24"
-                      FontWeight="Bold"/>
+                       FontSize="24"
+                       FontWeight="Bold" />
 
             <!-- BA2 Archive Patcher Section -->
             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
@@ -26,37 +26,37 @@
                     CornerRadius="5">
                 <StackPanel Spacing="15">
                     <TextBlock Text="BA2 Archive Version Patcher"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
                     <TextBlock Text="Convert BA2 archives between different format versions (v1, v7, v8)"
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                              TextWrapping="Wrap"/>
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                               TextWrapping="Wrap" />
 
                     <!-- Source BA2 File -->
                     <StackPanel Spacing="5">
-                        <TextBlock Text="Source BA2 Archive:"/>
+                        <TextBlock Text="Source BA2 Archive:" />
                         <TextBox Text="{Binding SourceBA2Path}"
-                                Watermark="Select a BA2 archive file to patch..."
-                                IsReadOnly="False"/>
+                                 Watermark="Select a BA2 archive file to patch..."
+                                 IsReadOnly="False" />
                     </StackPanel>
 
                     <!-- Target Version Selection -->
                     <StackPanel Spacing="5">
-                        <TextBlock Text="Target Version:"/>
+                        <TextBlock Text="Target Version:" />
                         <ComboBox SelectedItem="{Binding TargetVersion}"
-                                 HorizontalAlignment="Left"
-                                 MinWidth="200">
-                            <ComboBoxItem Content="Version 1 (Original Game)"/>
-                            <ComboBoxItem Content="Version 7"/>
-                            <ComboBoxItem Content="Version 8 (Next Gen)"/>
+                                  HorizontalAlignment="Left"
+                                  MinWidth="200">
+                            <ComboBoxItem Content="Version 1 (Original Game)" />
+                            <ComboBoxItem Content="Version 7" />
+                            <ComboBoxItem Content="Version 8 (Next Gen)" />
                         </ComboBox>
                     </StackPanel>
 
                     <!-- Patch Button -->
                     <Button Content="Patch BA2 Archive"
-                           Command="{Binding PatchBA2Command}"
-                           HorizontalAlignment="Left"
-                           Padding="20,8"/>
+                            Command="{Binding PatchBA2Command}"
+                            HorizontalAlignment="Left"
+                            Padding="20,8" />
                 </StackPanel>
             </Border>
 
@@ -67,40 +67,42 @@
                     CornerRadius="5">
                 <StackPanel Spacing="15">
                     <TextBlock Text="Game File Patcher (XDelta)"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
-                    <TextBlock Text="Apply xdelta patches to game files. The patch will be applied in-place with automatic backup creation."
-                              Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                              TextWrapping="Wrap"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
+                    <TextBlock
+                        Text="Apply xdelta patches to game files. The patch will be applied in-place with automatic backup creation."
+                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                        TextWrapping="Wrap" />
 
                     <!-- Source File -->
                     <StackPanel Spacing="5">
-                        <TextBlock Text="Source File to Patch:"/>
+                        <TextBlock Text="Source File to Patch:" />
                         <TextBox Text="{Binding SourceFilePath}"
-                                Watermark="Select the file to patch (e.g., Fallout4.exe)..."
-                                IsReadOnly="False"/>
+                                 Watermark="Select the file to patch (e.g., Fallout4.exe)..."
+                                 IsReadOnly="False" />
                     </StackPanel>
 
                     <!-- Patch File -->
                     <StackPanel Spacing="5">
-                        <TextBlock Text="Delta Patch File (.xdelta):"/>
+                        <TextBlock Text="Delta Patch File (.xdelta):" />
                         <TextBox Text="{Binding PatchFilePath}"
-                                Watermark="Select the xdelta patch file..."
-                                IsReadOnly="False"/>
+                                 Watermark="Select the xdelta patch file..."
+                                 IsReadOnly="False" />
                     </StackPanel>
 
                     <!-- Info about backup -->
                     <TextBlock Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                              FontStyle="Italic"
-                              TextWrapping="Wrap">
-                        <Run Text="ℹ The original file will be backed up automatically (e.g., Fallout4_patchBackup.exe)"/>
+                               FontStyle="Italic"
+                               TextWrapping="Wrap">
+                        <Run
+                            Text="ℹ The original file will be backed up automatically (e.g., Fallout4_patchBackup.exe)" />
                     </TextBlock>
 
                     <!-- Apply Patch Button -->
                     <Button Content="Apply Patch"
-                           Command="{Binding ApplyPatchCommand}"
-                           HorizontalAlignment="Left"
-                           Padding="20,8"/>
+                            Command="{Binding ApplyPatchCommand}"
+                            HorizontalAlignment="Left"
+                            Padding="20,8" />
                 </StackPanel>
             </Border>
 
@@ -112,25 +114,25 @@
                     IsVisible="{Binding IsBusy}">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Operation in Progress"
-                              FontSize="16"
-                              FontWeight="SemiBold"/>
+                               FontSize="16"
+                               FontWeight="SemiBold" />
                     <ProgressBar Value="{Binding ProgressPercentage}"
-                                Height="8"/>
+                                 Height="8" />
                     <TextBlock Text="{Binding StatusMessage}"
-                              Foreground="{DynamicResource SystemAccentColor}"/>
+                               Foreground="{DynamicResource SystemAccentColor}" />
                 </StackPanel>
             </Border>
 
             <!-- Status Message -->
             <TextBlock Text="{Binding StatusMessage}"
-                      IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
-                      Foreground="{DynamicResource SystemAccentColor}"/>
+                       IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                       Foreground="{DynamicResource SystemAccentColor}" />
 
             <!-- Error Message -->
             <TextBlock Text="{Binding ErrorMessage}"
-                      IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
-                      Foreground="Red"
-                      TextWrapping="Wrap"/>
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                       Foreground="Red"
+                       TextWrapping="Wrap" />
 
             <!-- Information Panel -->
             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
@@ -140,14 +142,17 @@
                     Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
                 <StackPanel Spacing="10">
                     <TextBlock Text="ℹ Information"
-                              FontSize="16"
-                              FontWeight="SemiBold"/>
+                               FontSize="16"
+                               FontWeight="SemiBold" />
                     <TextBlock TextWrapping="Wrap">
-                        <Run Text="• BA2 Archive Patcher: Converts BA2 archives between format versions. Required when downgrading or upgrading game versions."/>
-                        <LineBreak/><LineBreak/>
-                        <Run Text="• XDelta Patcher: Applies binary delta patches to game files in-place. The original file is automatically backed up before patching."/>
-                        <LineBreak/><LineBreak/>
-                        <Run Text="⚠ Warning: Backup files are created automatically, but keep additional backups of critical files!"/>
+                        <Run
+                            Text="• BA2 Archive Patcher: Converts BA2 archives between format versions. Required when downgrading or upgrading game versions." />
+                        <LineBreak /><LineBreak />
+                        <Run
+                            Text="• XDelta Patcher: Applies binary delta patches to game files in-place. The original file is automatically backed up before patching." />
+                        <LineBreak /><LineBreak />
+                        <Run
+                            Text="⚠ Warning: Backup files are created automatically, but keep additional backups of critical files!" />
                     </TextBlock>
                 </StackPanel>
             </Border>

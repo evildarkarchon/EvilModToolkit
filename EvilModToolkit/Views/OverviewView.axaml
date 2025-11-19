@@ -8,7 +8,7 @@
              x:DataType="vm:OverviewViewModel">
 
     <Design.DataContext>
-        <vm:OverviewViewModel/>
+        <vm:OverviewViewModel />
     </Design.DataContext>
 
     <ScrollViewer>
@@ -16,14 +16,14 @@
             <!-- Header with Refresh Button -->
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Grid.Column="0"
-                          Text="Overview"
-                          FontSize="24"
-                          FontWeight="Bold"
-                          VerticalAlignment="Center"/>
+                           Text="Overview"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center" />
                 <Button Grid.Column="1"
                         Content="Refresh"
                         Command="{Binding RefreshCommand}"
-                        Padding="20,5"/>
+                        Padding="20,5" />
             </Grid>
 
             <!-- Game Information Section -->
@@ -33,43 +33,43 @@
                     CornerRadius="5">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Fallout 4 Installation"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,10,0,0">
                         <Grid.Styles>
                             <Style Selector="TextBlock.Label">
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Margin" Value="0,0,15,5"/>
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Margin" Value="0,0,15,5" />
                             </Style>
                             <Style Selector="TextBlock.Value">
-                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Margin" Value="0,0,0,5" />
                             </Style>
                         </Grid.Styles>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
-                                  Text="{Binding IsGameDetected, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Installed|Not Detected'}"
-                                  Foreground="{Binding IsGameDetected, Converter={StaticResource BoolToColorConverter}}"/>
+                                   Text="{Binding IsGameDetected, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Installed|Not Detected'}"
+                                   Foreground="{Binding IsGameDetected, Converter={StaticResource BoolToColorConverter}}" />
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Install Path:"
-                                  IsVisible="{Binding IsGameDetected}"/>
+                                   IsVisible="{Binding IsGameDetected}" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
-                                  Text="{Binding GameInfo.InstallPath}"
-                                  IsVisible="{Binding IsGameDetected}"
-                                  TextWrapping="Wrap"/>
+                                   Text="{Binding GameInfo.InstallPath}"
+                                   IsVisible="{Binding IsGameDetected}"
+                                   TextWrapping="Wrap" />
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="Version:"
-                                  IsVisible="{Binding IsGameDetected}"/>
+                                   IsVisible="{Binding IsGameDetected}" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
-                                  Text="{Binding GameInfo.Version}"
-                                  IsVisible="{Binding IsGameDetected}"/>
+                                   Text="{Binding GameInfo.Version}"
+                                   IsVisible="{Binding IsGameDetected}" />
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Classes="Label" Text="Install Type:"
-                                  IsVisible="{Binding IsGameDetected}"/>
+                                   IsVisible="{Binding IsGameDetected}" />
                         <TextBlock Grid.Row="3" Grid.Column="1" Classes="Value"
-                                  Text="{Binding GameInfo.InstallType, Converter={StaticResource EnumToStringConverter}}"
-                                  IsVisible="{Binding IsGameDetected}"/>
+                                   Text="{Binding GameInfo.InstallType, Converter={StaticResource EnumToStringConverter}}"
+                                   IsVisible="{Binding IsGameDetected}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -81,30 +81,30 @@
                     CornerRadius="5">
                 <StackPanel Spacing="10">
                     <TextBlock Text="F4SE (Fallout 4 Script Extender)"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,10,0,0">
                         <Grid.Styles>
                             <Style Selector="TextBlock.Label">
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Margin" Value="0,0,15,5"/>
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Margin" Value="0,0,15,5" />
                             </Style>
                             <Style Selector="TextBlock.Value">
-                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Margin" Value="0,0,0,5" />
                             </Style>
                         </Grid.Styles>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
-                                  Text="{Binding IsF4SeInstalled, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Installed|Not Installed'}"
-                                  Foreground="{Binding IsF4SeInstalled, Converter={StaticResource BoolToColorConverter}}"/>
+                                   Text="{Binding IsF4SeInstalled, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Installed|Not Installed'}"
+                                   Foreground="{Binding IsF4SeInstalled, Converter={StaticResource BoolToColorConverter}}" />
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Version:"
-                                  IsVisible="{Binding IsF4SeInstalled}"/>
+                                   IsVisible="{Binding IsF4SeInstalled}" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
-                                  Text="{Binding F4SeVersion}"
-                                  IsVisible="{Binding IsF4SeInstalled}"/>
+                                   Text="{Binding F4SeVersion}"
+                                   IsVisible="{Binding IsF4SeInstalled}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -117,65 +117,66 @@
                     IsVisible="{Binding IsGameDetected}">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Archives (BA2)"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
 
-                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,10,0,0">
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                          Margin="0,10,0,0">
                         <Grid.Styles>
                             <Style Selector="TextBlock.Label">
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Margin" Value="0,0,15,5"/>
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Margin" Value="0,0,15,5" />
                             </Style>
                             <Style Selector="TextBlock.Value">
-                                <Setter Property="Margin" Value="0,0,5,5"/>
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Margin" Value="0,0,5,5" />
+                                <Setter Property="HorizontalAlignment" Value="Right" />
                             </Style>
                             <Style Selector="TextBlock.Limit">
-                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Margin" Value="0,0,0,5" />
                             </Style>
                         </Grid.Styles>
 
                         <!-- Row 0: General Archives -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="General:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="General:" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
-                                  Text="{Binding BA2CountGeneral}"
-                                  Foreground="{Binding BA2CountGeneral, Converter={StaticResource BA2ArchiveCountToColorConverter}, ConverterParameter=256}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Classes="Limit" Text=" / 256"/>
+                                   Text="{Binding BA2CountGeneral}"
+                                   Foreground="{Binding BA2CountGeneral, Converter={StaticResource BA2ArchiveCountToColorConverter}, ConverterParameter=256}" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Classes="Limit" Text=" / 256" />
 
                         <!-- Row 1: Texture Archives -->
-                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Texture:"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Texture:" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
-                                  Text="{Binding BA2CountTexture}"
-                                  Foreground="{Binding BA2CountTexture, Converter={StaticResource BA2ArchiveCountToColorConverter}, ConverterParameter=256}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="2" Classes="Limit" Text=" / 256"/>
+                                   Text="{Binding BA2CountTexture}"
+                                   Foreground="{Binding BA2CountTexture, Converter={StaticResource BA2ArchiveCountToColorConverter}, ConverterParameter=256}" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Classes="Limit" Text=" / 256" />
 
                         <!-- Row 2: Total Archives -->
-                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="Total:"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="Total:" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
-                                  Text="{Binding BA2CountTotal}"
-                                  Foreground="{Binding BA2CountTotal, Converter={StaticResource BA2ArchiveCountToColorConverter}, ConverterParameter=512}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="2" Classes="Limit" Text=" / 512"/>
+                                   Text="{Binding BA2CountTotal}"
+                                   Foreground="{Binding BA2CountTotal, Converter={StaticResource BA2ArchiveCountToColorConverter}, ConverterParameter=512}" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" Classes="Limit" Text=" / 512" />
 
                         <!-- Row 3: Separator -->
                         <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
                                 Height="1"
                                 Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                                Margin="0,5"/>
+                                Margin="0,5" />
 
                         <!-- Row 4: Unreadable -->
-                        <TextBlock Grid.Row="4" Grid.Column="0" Classes="Label" Text="Unreadable:"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Classes="Label" Text="Unreadable:" />
                         <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Classes="Value"
-                                  Text="{Binding BA2CountUnreadable}"/>
+                                   Text="{Binding BA2CountUnreadable}" />
 
                         <!-- Row 5: v1 (OG) -->
-                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="Label" Text="v1 (OG):"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="Label" Text="v1 (OG):" />
                         <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Classes="Value"
-                                  Text="{Binding BA2CountV1}"/>
+                                   Text="{Binding BA2CountV1}" />
 
                         <!-- Row 6: v7/8 (NG) -->
-                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="Label" Text="v7/8 (NG):"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="Label" Text="v7/8 (NG):" />
                         <TextBlock Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Classes="Value"
-                                  Text="{Binding BA2CountV7V8}"/>
+                                   Text="{Binding BA2CountV7V8}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -187,35 +188,35 @@
                     CornerRadius="5">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Mod Manager"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,10,0,0">
                         <Grid.Styles>
                             <Style Selector="TextBlock.Label">
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Margin" Value="0,0,15,5"/>
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Margin" Value="0,0,15,5" />
                             </Style>
                             <Style Selector="TextBlock.Value">
-                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Margin" Value="0,0,0,5" />
                             </Style>
                         </Grid.Styles>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Status:" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
-                                  Text="{Binding IsModManagerDetected, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Detected|Not Detected'}"/>
+                                   Text="{Binding IsModManagerDetected, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Detected|Not Detected'}" />
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="Type:"
-                                  IsVisible="{Binding IsModManagerDetected}"/>
+                                   IsVisible="{Binding IsModManagerDetected}" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
-                                  Text="{Binding ModManagerInfo.Type, Converter={StaticResource EnumToStringConverter}}"
-                                  IsVisible="{Binding IsModManagerDetected}"/>
+                                   Text="{Binding ModManagerInfo.Type, Converter={StaticResource EnumToStringConverter}}"
+                                   IsVisible="{Binding IsModManagerDetected}" />
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="Version:"
-                                  IsVisible="{Binding IsModManagerDetected}"/>
+                                   IsVisible="{Binding IsModManagerDetected}" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
-                                  Text="{Binding ModManagerInfo.Version}"
-                                  IsVisible="{Binding IsModManagerDetected}"/>
+                                   Text="{Binding ModManagerInfo.Version}"
+                                   IsVisible="{Binding IsModManagerDetected}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -228,37 +229,37 @@
                     IsVisible="{Binding SystemInfo, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
                 <StackPanel Spacing="10">
                     <TextBlock Text="System Information"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,10,0,0">
                         <Grid.Styles>
                             <Style Selector="TextBlock.Label">
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Margin" Value="0,0,15,5"/>
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Margin" Value="0,0,15,5" />
                             </Style>
                             <Style Selector="TextBlock.Value">
-                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Margin" Value="0,0,0,5" />
                             </Style>
                         </Grid.Styles>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Operating System:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Classes="Label" Text="Operating System:" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Classes="Value"
-                                  Text="{Binding SystemInfo.OperatingSystem}"/>
+                                   Text="{Binding SystemInfo.OperatingSystem}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="RAM:"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="Label" Text="RAM:" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Classes="Value"
-                                  Text="{Binding SystemInfo.TotalRamGb, StringFormat='{}{0:F1} GB'}"/>
+                                   Text="{Binding SystemInfo.TotalRamGb, StringFormat='{}{0:F1} GB'}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="CPU:"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="Label" Text="CPU:" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Classes="Value"
-                                  Text="{Binding SystemInfo.CpuName}"
-                                  TextWrapping="Wrap"/>
+                                   Text="{Binding SystemInfo.CpuName}"
+                                   TextWrapping="Wrap" />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="Label" Text="GPU:"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="Label" Text="GPU:" />
                         <TextBlock Grid.Row="3" Grid.Column="1" Classes="Value"
-                                  Text="{Binding SystemInfo.GpuName}"
-                                  TextWrapping="Wrap"/>
+                                   Text="{Binding SystemInfo.GpuName}"
+                                   TextWrapping="Wrap" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -271,24 +272,25 @@
                     IsVisible="{Binding Problems.Count, Converter={StaticResource CountToVisibilityConverter}}">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Issues Detected"
-                              FontSize="18"
-                              FontWeight="SemiBold"/>
+                               FontSize="18"
+                               FontWeight="SemiBold" />
 
                     <ItemsControl ItemsSource="{Binding Problems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{Binding Severity, Converter={StaticResource SeverityToColorConverter}}"
-                                        BorderThickness="2"
-                                        Padding="10"
-                                        Margin="0,5"
-                                        CornerRadius="3">
+                                <Border
+                                    BorderBrush="{Binding Severity, Converter={StaticResource SeverityToColorConverter}}"
+                                    BorderThickness="2"
+                                    Padding="10"
+                                    Margin="0,5"
+                                    CornerRadius="3">
                                     <StackPanel Spacing="5">
                                         <TextBlock Text="{Binding Summary}"
-                                                  FontWeight="SemiBold"
-                                                  TextWrapping="Wrap"/>
+                                                   FontWeight="SemiBold"
+                                                   TextWrapping="Wrap" />
                                         <TextBlock Text="{Binding Solution}"
-                                                  TextWrapping="Wrap"
-                                                  Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -299,14 +301,14 @@
 
             <!-- Status Message -->
             <TextBlock Text="{Binding StatusMessage}"
-                      IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
-                      Foreground="{DynamicResource SystemAccentColor}"/>
+                       IsVisible="{Binding StatusMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                       Foreground="{DynamicResource SystemAccentColor}" />
 
             <!-- Error Message -->
             <TextBlock Text="{Binding ErrorMessage}"
-                      IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
-                      Foreground="Red"
-                      TextWrapping="Wrap"/>
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                       Foreground="Red"
+                       TextWrapping="Wrap" />
         </StackPanel>
     </ScrollViewer>
 

@@ -72,7 +72,8 @@ namespace EvilModToolkit.Services.Platform
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Failed to set suggested start location: {Path}", suggestedStartLocation);
+                        _logger.LogWarning(ex, "Failed to set suggested start location: {Path}",
+                            suggestedStartLocation);
                     }
                 }
 

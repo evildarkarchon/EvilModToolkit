@@ -32,11 +32,11 @@ namespace EvilModToolkit.Tests.Converters
         /// This validates the safe zone coloring.
         /// </summary>
         [Theory]
-        [InlineData(0, "256")]      // 0% of limit
-        [InlineData(50, "256")]     // ~19.5% of limit
-        [InlineData(100, "256")]    // ~39% of limit
-        [InlineData(200, "256")]    // ~78% of limit
-        [InlineData(242, "256")]    // ~94.5% of limit (just under 95%)
+        [InlineData(0, "256")] // 0% of limit
+        [InlineData(50, "256")] // ~19.5% of limit
+        [InlineData(100, "256")] // ~39% of limit
+        [InlineData(200, "256")] // ~78% of limit
+        [InlineData(242, "256")] // ~94.5% of limit (just under 95%)
         public void Convert_WhenCountBelowWarningThreshold_ReturnsGreen(int count, string limit)
         {
             // Act
@@ -74,10 +74,10 @@ namespace EvilModToolkit.Tests.Converters
         /// Validates that the converter works correctly with different limit values.
         /// </summary>
         [Theory]
-        [InlineData(0, "512")]      // 0% of limit
-        [InlineData(256, "512")]    // 50% of limit
-        [InlineData(400, "512")]    // ~78% of limit
-        [InlineData(485, "512")]    // ~94.7% of limit (just under 95%)
+        [InlineData(0, "512")] // 0% of limit
+        [InlineData(256, "512")] // 50% of limit
+        [InlineData(400, "512")] // ~78% of limit
+        [InlineData(485, "512")] // ~94.7% of limit (just under 95%)
         public void Convert_WithTotalLimit_WhenBelowWarningThreshold_ReturnsGreen(int count, string limit)
         {
             // Act
@@ -98,10 +98,10 @@ namespace EvilModToolkit.Tests.Converters
         /// This validates the warning zone coloring.
         /// </summary>
         [Theory]
-        [InlineData(243, "256")]    // Exactly at 95% threshold: int(0.95 * 256) = 243
-        [InlineData(244, "256")]    // Just above 95%
-        [InlineData(250, "256")]    // ~97.6% of limit
-        [InlineData(255, "256")]    // 99.6% of limit (just under 100%)
+        [InlineData(243, "256")] // Exactly at 95% threshold: int(0.95 * 256) = 243
+        [InlineData(244, "256")] // Just above 95%
+        [InlineData(250, "256")] // ~97.6% of limit
+        [InlineData(255, "256")] // 99.6% of limit (just under 100%)
         public void Convert_WhenCountInWarningZone_ReturnsYellow(int count, string limit)
         {
             // Act
@@ -141,9 +141,9 @@ namespace EvilModToolkit.Tests.Converters
         /// Validates warning zone for larger limits.
         /// </summary>
         [Theory]
-        [InlineData(486, "512")]    // Exactly at 95% threshold: int(0.95 * 512) = 486
-        [InlineData(500, "512")]    // ~97.6% of limit
-        [InlineData(511, "512")]    // 99.8% of limit (just under 100%)
+        [InlineData(486, "512")] // Exactly at 95% threshold: int(0.95 * 512) = 486
+        [InlineData(500, "512")] // ~97.6% of limit
+        [InlineData(511, "512")] // 99.8% of limit (just under 100%)
         public void Convert_WithTotalLimit_WhenInWarningZone_ReturnsYellow(int count, string limit)
         {
             // Act
@@ -165,10 +165,10 @@ namespace EvilModToolkit.Tests.Converters
         /// This validates the critical/danger zone coloring.
         /// </summary>
         [Theory]
-        [InlineData(256, "256")]    // Exactly at limit (100%)
-        [InlineData(257, "256")]    // Just over limit
-        [InlineData(300, "256")]    // Well over limit
-        [InlineData(1000, "256")]   // Far over limit
+        [InlineData(256, "256")] // Exactly at limit (100%)
+        [InlineData(257, "256")] // Just over limit
+        [InlineData(300, "256")] // Well over limit
+        [InlineData(1000, "256")] // Far over limit
         public void Convert_WhenCountAtOrOverLimit_ReturnsRed(int count, string limit)
         {
             // Act
@@ -207,9 +207,9 @@ namespace EvilModToolkit.Tests.Converters
         /// Validates critical zone for larger limits.
         /// </summary>
         [Theory]
-        [InlineData(512, "512")]    // Exactly at limit
-        [InlineData(513, "512")]    // Just over limit
-        [InlineData(600, "512")]    // Well over limit
+        [InlineData(512, "512")] // Exactly at limit
+        [InlineData(513, "512")] // Just over limit
+        [InlineData(600, "512")] // Well over limit
         public void Convert_WithTotalLimit_WhenAtOrOverLimit_ReturnsRed(int count, string limit)
         {
             // Act
@@ -252,8 +252,8 @@ namespace EvilModToolkit.Tests.Converters
         [InlineData(null)]
         [InlineData("")]
         [InlineData("not a number")]
-        [InlineData("0")]       // Zero limit is invalid
-        [InlineData("-256")]    // Negative limit is invalid
+        [InlineData("0")] // Zero limit is invalid
+        [InlineData("-256")] // Negative limit is invalid
         public void Convert_WithInvalidLimitParameter_ReturnsDefaultBrush(object? invalidLimit)
         {
             // Act
@@ -306,9 +306,9 @@ namespace EvilModToolkit.Tests.Converters
         /// Python uses: int(0.95 * limit), which truncates decimals.
         /// </summary>
         [Theory]
-        [InlineData(256, 243)]  // int(0.95 * 256) = int(243.2) = 243
-        [InlineData(512, 486)]  // int(0.95 * 512) = int(486.4) = 486
-        [InlineData(100, 95)]   // int(0.95 * 100) = int(95.0) = 95
+        [InlineData(256, 243)] // int(0.95 * 256) = int(243.2) = 243
+        [InlineData(512, 486)] // int(0.95 * 512) = int(486.4) = 486
+        [InlineData(100, 95)] // int(0.95 * 100) = int(95.0) = 95
         [InlineData(1000, 950)] // int(0.95 * 1000) = int(950.0) = 950
         public void Convert_CalculatesWarningThresholdCorrectly(int limit, int expectedThreshold)
         {
@@ -325,9 +325,12 @@ namespace EvilModToolkit.Tests.Converters
             var greenBrush = (SolidColorBrush)greenResult!;
             var yellowBrush = (SolidColorBrush)yellowResult!;
 
-            greenBrush.Color.G.Should().BeGreaterThan(150, $"count {greenCount} should be green (< {expectedThreshold})");
-            yellowBrush.Color.R.Should().BeGreaterThan(200, $"count {yellowCount} should be yellow (>= {expectedThreshold})");
-            yellowBrush.Color.G.Should().BeGreaterThan(150, $"count {yellowCount} should be yellow (>= {expectedThreshold})");
+            greenBrush.Color.G.Should()
+                .BeGreaterThan(150, $"count {greenCount} should be green (< {expectedThreshold})");
+            yellowBrush.Color.R.Should()
+                .BeGreaterThan(200, $"count {yellowCount} should be yellow (>= {expectedThreshold})");
+            yellowBrush.Color.G.Should()
+                .BeGreaterThan(150, $"count {yellowCount} should be yellow (>= {expectedThreshold})");
         }
 
         /// <summary>
@@ -343,12 +346,12 @@ namespace EvilModToolkit.Tests.Converters
                 (Count: 0, ExpectedZone: "green"),
                 (Count: 100, ExpectedZone: "green"),
                 (Count: 200, ExpectedZone: "green"),
-                (Count: 242, ExpectedZone: "green"),   // Just below 95%
-                (Count: 243, ExpectedZone: "yellow"),  // At 95%
-                (Count: 250, ExpectedZone: "yellow"),  // In warning zone
-                (Count: 255, ExpectedZone: "yellow"),  // Just below 100%
-                (Count: 256, ExpectedZone: "red"),     // At 100%
-                (Count: 300, ExpectedZone: "red")      // Over 100%
+                (Count: 242, ExpectedZone: "green"), // Just below 95%
+                (Count: 243, ExpectedZone: "yellow"), // At 95%
+                (Count: 250, ExpectedZone: "yellow"), // In warning zone
+                (Count: 255, ExpectedZone: "yellow"), // Just below 100%
+                (Count: 256, ExpectedZone: "red"), // At 100%
+                (Count: 300, ExpectedZone: "red") // Over 100%
             };
 
             foreach (var (count, expectedZone) in testCases)

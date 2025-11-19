@@ -15,17 +15,17 @@
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
     <DockPanel>
         <!-- Menu Bar -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" InputGesture="Alt+F4"/>
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" InputGesture="Alt+F4" />
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
+                <MenuItem Header="_About" Command="{Binding AboutCommand}" />
             </MenuItem>
         </Menu>
 
@@ -35,12 +35,12 @@
                 Padding="10,5">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <TextBlock Grid.Column="0"
-                          Text="Ready"
-                          VerticalAlignment="Center"/>
+                           Text="Ready"
+                           VerticalAlignment="Center" />
                 <TextBlock Grid.Column="2"
-                          Text="v1.0.0"
-                          VerticalAlignment="Center"
-                          Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                           Text="v1.0.0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
             </Grid>
         </Border>
 
@@ -48,16 +48,16 @@
         <TabControl SelectedIndex="{Binding SelectedTabIndex}"
                     Margin="5">
             <TabItem Header="Overview">
-                <views:OverviewView DataContext="{Binding OverviewViewModel}"/>
+                <views:OverviewView DataContext="{Binding OverviewViewModel}" />
             </TabItem>
             <TabItem Header="F4SE Scanner">
-                <views:F4SEView DataContext="{Binding F4SEViewModel}"/>
+                <views:F4SEView DataContext="{Binding F4SEViewModel}" />
             </TabItem>
             <TabItem Header="Tools">
-                <views:ToolsView DataContext="{Binding ToolsViewModel}"/>
+                <views:ToolsView DataContext="{Binding ToolsViewModel}" />
             </TabItem>
             <TabItem Header="Settings">
-                <views:SettingsView DataContext="{Binding SettingsViewModel}"/>
+                <views:SettingsView DataContext="{Binding SettingsViewModel}" />
             </TabItem>
         </TabControl>
     </DockPanel>

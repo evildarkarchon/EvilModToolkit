@@ -478,8 +478,10 @@ namespace EvilModToolkit.Tests.ViewModels
             var tempSourceFile = Path.GetTempFileName();
             var tempPatchFile = Path.GetTempFileName();
             var tempDir = Path.GetDirectoryName(tempSourceFile)!;
-            var tempOutputFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_temp{Path.GetExtension(tempSourceFile)}");
-            var backupFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_patchBackup{Path.GetExtension(tempSourceFile)}");
+            var tempOutputFile = Path.Combine(tempDir,
+                $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_temp{Path.GetExtension(tempSourceFile)}");
+            var backupFile = Path.Combine(tempDir,
+                $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_patchBackup{Path.GetExtension(tempSourceFile)}");
 
             try
             {
@@ -489,11 +491,11 @@ namespace EvilModToolkit.Tests.ViewModels
 
                 // Setup patch to succeed
                 _xdeltaPatcherService.ApplyPatchAsync(
-                    tempSourceFile,
-                    tempPatchFile,
-                    Arg.Any<string>(), // Will be temp output path
-                    Arg.Any<IProgress<PatchProgress>>(),
-                    Arg.Any<CancellationToken>())
+                        tempSourceFile,
+                        tempPatchFile,
+                        Arg.Any<string>(), // Will be temp output path
+                        Arg.Any<IProgress<PatchProgress>>(),
+                        Arg.Any<CancellationToken>())
                     .Returns(callInfo =>
                     {
                         // Create the temp output file to simulate successful patch
@@ -551,8 +553,10 @@ namespace EvilModToolkit.Tests.ViewModels
             var tempSourceFile = Path.GetTempFileName();
             var tempPatchFile = Path.GetTempFileName();
             var tempDir = Path.GetDirectoryName(tempSourceFile)!;
-            var tempOutputFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_temp{Path.GetExtension(tempSourceFile)}");
-            var backupFile = Path.Combine(tempDir, $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_patchBackup{Path.GetExtension(tempSourceFile)}");
+            var tempOutputFile = Path.Combine(tempDir,
+                $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_temp{Path.GetExtension(tempSourceFile)}");
+            var backupFile = Path.Combine(tempDir,
+                $"{Path.GetFileNameWithoutExtension(tempSourceFile)}_patchBackup{Path.GetExtension(tempSourceFile)}");
 
             try
             {
@@ -562,11 +566,11 @@ namespace EvilModToolkit.Tests.ViewModels
 
                 // Capture the progress reporter passed to ApplyPatchAsync
                 _xdeltaPatcherService.ApplyPatchAsync(
-                    tempSourceFile,
-                    tempPatchFile,
-                    Arg.Any<string>(),
-                    Arg.Do<IProgress<PatchProgress>>(p => { }),
-                    Arg.Any<CancellationToken>())
+                        tempSourceFile,
+                        tempPatchFile,
+                        Arg.Any<string>(),
+                        Arg.Do<IProgress<PatchProgress>>(p => { }),
+                        Arg.Any<CancellationToken>())
                     .Returns(async callInfo =>
                     {
                         // Simulate progress updates
@@ -640,11 +644,11 @@ namespace EvilModToolkit.Tests.ViewModels
                     .Returns(Task.FromResult((true, (string?)null)));
 
                 _xdeltaPatcherService.ApplyPatchAsync(
-                    tempSourceFile,
-                    tempPatchFile,
-                    Arg.Any<string>(),
-                    Arg.Any<IProgress<PatchProgress>>(),
-                    Arg.Any<CancellationToken>())
+                        tempSourceFile,
+                        tempPatchFile,
+                        Arg.Any<string>(),
+                        Arg.Any<IProgress<PatchProgress>>(),
+                        Arg.Any<CancellationToken>())
                     .Returns(Task.FromResult(new PatchResult
                     {
                         Success = false,
@@ -685,11 +689,11 @@ namespace EvilModToolkit.Tests.ViewModels
                     .Returns(Task.FromResult((true, (string?)null)));
 
                 _xdeltaPatcherService.ApplyPatchAsync(
-                    tempSourceFile,
-                    tempPatchFile,
-                    Arg.Any<string>(),
-                    Arg.Any<IProgress<PatchProgress>>(),
-                    Arg.Any<CancellationToken>())
+                        tempSourceFile,
+                        tempPatchFile,
+                        Arg.Any<string>(),
+                        Arg.Any<IProgress<PatchProgress>>(),
+                        Arg.Any<CancellationToken>())
                     .Returns(async callInfo =>
                     {
                         var cancellationToken = callInfo.ArgAt<CancellationToken>(4);

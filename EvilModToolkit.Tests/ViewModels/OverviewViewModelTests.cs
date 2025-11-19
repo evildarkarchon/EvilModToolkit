@@ -37,8 +37,10 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             // Setup mocks to return valid data so initial refresh doesn't add problems
-            _gameDetectionService.DetectGame().Returns(new GameInfo { IsInstalled = true, InstallPath = @"C:\Games\FO4" });
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _gameDetectionService.DetectGame()
+                .Returns(new GameInfo { IsInstalled = true, InstallPath = @"C:\Games\FO4" });
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
 
             // Act
@@ -147,7 +149,7 @@ namespace EvilModToolkit.Tests.ViewModels
             // GameInfo uses init-only properties, so we create with IsInstalled = true
             var gameInfo = new GameInfo
             {
-                IsInstalled = true,  // Required to indicate game was found
+                IsInstalled = true, // Required to indicate game was found
                 InstallPath = @"C:\Program Files\Steam\steamapps\common\Fallout 4",
                 Version = "1.10.163.0",
                 InstallType = InstallType.Steam
@@ -157,7 +159,8 @@ namespace EvilModToolkit.Tests.ViewModels
             _gameDetectionService.DetectGame().Returns(gameInfo);
 
             // DetectModManagerAsync returns non-nullable ModManagerInfo with Type = None when not detected
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
 
             var viewModel = new OverviewViewModel(
@@ -188,7 +191,8 @@ namespace EvilModToolkit.Tests.ViewModels
             _gameDetectionService.DetectGame().Returns(gameInfo);
 
             // DetectModManagerAsync returns non-nullable ModManagerInfo with Type = None
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
 
             var viewModel = new OverviewViewModel(
@@ -227,8 +231,8 @@ namespace EvilModToolkit.Tests.ViewModels
             // ExecutablePath (not InstallPath) contains the path to the mod manager executable
             var modManagerInfo = new ModManagerInfo
             {
-                Type = ModManagerType.ModOrganizer2,  // Correct property name and type
-                ExecutablePath = @"C:\Modding\MO2\ModOrganizer.exe",  // Correct property name
+                Type = ModManagerType.ModOrganizer2, // Correct property name and type
+                ExecutablePath = @"C:\Modding\MO2\ModOrganizer.exe", // Correct property name
                 Version = "2.5.0"
             };
 
@@ -264,7 +268,7 @@ namespace EvilModToolkit.Tests.ViewModels
             var systemInfo = new SystemInfo
             {
                 OperatingSystem = "Windows 11",
-                TotalRamGb = 32.0,  // Correct property name: TotalRamGb (not TotalRamMb)
+                TotalRamGb = 32.0, // Correct property name: TotalRamGb (not TotalRamMb)
                 CpuName = "AMD Ryzen 9 5900X",
                 GpuName = "NVIDIA GeForce RTX 3080"
             };
@@ -272,7 +276,8 @@ namespace EvilModToolkit.Tests.ViewModels
             // DetectGame is synchronous, returns GameInfo with IsInstalled = true
             _gameDetectionService.DetectGame().Returns(new GameInfo { IsInstalled = true });
             // DetectModManagerAsync returns non-nullable ModManagerInfo with Type = None
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(systemInfo));
 
             var viewModel = new OverviewViewModel(
@@ -301,7 +306,8 @@ namespace EvilModToolkit.Tests.ViewModels
             // We delay one of the async operations instead (SystemInfoService)
             var taskCompletionSource = new TaskCompletionSource<SystemInfo>();
             _gameDetectionService.DetectGame().Returns(new GameInfo { IsInstalled = true });
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             // Note: GetSystemInfoAsync returns Task<SystemInfo?>, so use TaskCompletionSource<SystemInfo?>
             var systemInfoTaskSource = new TaskCompletionSource<SystemInfo?>();
             _systemInfoService.GetSystemInfoAsync().Returns(systemInfoTaskSource.Task);
@@ -338,7 +344,8 @@ namespace EvilModToolkit.Tests.ViewModels
             // Arrange
             // Initially return GameInfo with IsInstalled = false to trigger problem
             _gameDetectionService.DetectGame().Returns(new GameInfo { IsInstalled = false });
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
 
             var viewModel = new OverviewViewModel(
@@ -356,7 +363,7 @@ namespace EvilModToolkit.Tests.ViewModels
             // Now set up to return a valid game with IsInstalled = true
             var gameInfo = new GameInfo
             {
-                IsInstalled = true,  // Game is now installed
+                IsInstalled = true, // Game is now installed
                 InstallPath = @"C:\Games\Fallout 4",
                 Version = "1.10.163.0"
             };
@@ -379,7 +386,8 @@ namespace EvilModToolkit.Tests.ViewModels
             // DetectGame is synchronous, so we throw directly when called
             _gameDetectionService.When(x => x.DetectGame())
                 .Do(x => throw new InvalidOperationException("Test exception"));
-            _modManagerService.DetectModManagerAsync().Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
             _systemInfoService.GetSystemInfoAsync().Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
 
             var viewModel = new OverviewViewModel(

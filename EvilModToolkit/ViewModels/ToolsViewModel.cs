@@ -39,7 +39,8 @@ namespace EvilModToolkit.ViewModels
             ILogger<ToolsViewModel> logger)
         {
             _ba2ArchiveService = ba2ArchiveService ?? throw new ArgumentNullException(nameof(ba2ArchiveService));
-            _xdeltaPatcherService = xdeltaPatcherService ?? throw new ArgumentNullException(nameof(xdeltaPatcherService));
+            _xdeltaPatcherService =
+                xdeltaPatcherService ?? throw new ArgumentNullException(nameof(xdeltaPatcherService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Create ReactiveCommands for BA2 patching and xdelta patching
@@ -115,58 +116,59 @@ namespace EvilModToolkit.ViewModels
             {
                 // Execute with error handling provided by ViewModelBase
                 if (!await TryExecuteAsync(async () =>
-                {
-                    SetStatus("Patching BA2 archive...");
-                    _logger.LogInformation("Starting BA2 patch operation: {SourcePath} -> {TargetVersion}",
-                        SourceBA2Path, TargetVersion);
-
-                    // Validate input path
-                    if (string.IsNullOrWhiteSpace(SourceBA2Path))
                     {
-                        throw new InvalidOperationException("Source BA2 path is required.");
-                    }
+                        SetStatus("Patching BA2 archive...");
+                        _logger.LogInformation("Starting BA2 patch operation: {SourcePath} -> {TargetVersion}",
+                            SourceBA2Path, TargetVersion);
 
-                    if (!File.Exists(SourceBA2Path))
-                    {
-                        throw new FileNotFoundException($"Source BA2 file not found: {SourceBA2Path}");
-                    }
-
-                    // Validate that the file is a valid BA2 archive
-                    if (!_ba2ArchiveService.IsValidBA2(SourceBA2Path))
-                    {
-                        throw new InvalidOperationException($"The file is not a valid BA2 archive: {SourceBA2Path}");
-                    }
-
-                    // Get current archive info to display before patching
-                    var archiveInfo = _ba2ArchiveService.GetArchiveInfo(SourceBA2Path);
-                    if (archiveInfo != null)
-                    {
-                        _logger.LogInformation("Current BA2 version: {CurrentVersion}, Target: {TargetVersion}",
-                            archiveInfo.Version, TargetVersion);
-
-                        // Check if already at target version
-                        if (archiveInfo.Version == TargetVersion)
+                        // Validate input path
+                        if (string.IsNullOrWhiteSpace(SourceBA2Path))
                         {
-                            SetStatus($"Archive is already at version {TargetVersion}.");
-                            _logger.LogInformation("BA2 archive already at target version");
-                            return;
+                            throw new InvalidOperationException("Source BA2 path is required.");
                         }
-                    }
 
-                    // Perform the patch operation (synchronous operation wrapped in Task.Run for UI responsiveness)
-                    bool success = await Task.Run(() =>
-                        _ba2ArchiveService.PatchArchiveVersion(SourceBA2Path, TargetVersion));
+                        if (!File.Exists(SourceBA2Path))
+                        {
+                            throw new FileNotFoundException($"Source BA2 file not found: {SourceBA2Path}");
+                        }
 
-                    if (success)
-                    {
-                        SetStatus($"Successfully patched BA2 archive to version {TargetVersion}.");
-                        _logger.LogInformation("BA2 patch completed successfully");
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("BA2 patching failed. See logs for details.");
-                    }
-                }, _logger))
+                        // Validate that the file is a valid BA2 archive
+                        if (!_ba2ArchiveService.IsValidBA2(SourceBA2Path))
+                        {
+                            throw new InvalidOperationException(
+                                $"The file is not a valid BA2 archive: {SourceBA2Path}");
+                        }
+
+                        // Get current archive info to display before patching
+                        var archiveInfo = _ba2ArchiveService.GetArchiveInfo(SourceBA2Path);
+                        if (archiveInfo != null)
+                        {
+                            _logger.LogInformation("Current BA2 version: {CurrentVersion}, Target: {TargetVersion}",
+                                archiveInfo.Version, TargetVersion);
+
+                            // Check if already at target version
+                            if (archiveInfo.Version == TargetVersion)
+                            {
+                                SetStatus($"Archive is already at version {TargetVersion}.");
+                                _logger.LogInformation("BA2 archive already at target version");
+                                return;
+                            }
+                        }
+
+                        // Perform the patch operation (synchronous operation wrapped in Task.Run for UI responsiveness)
+                        bool success = await Task.Run(() =>
+                            _ba2ArchiveService.PatchArchiveVersion(SourceBA2Path, TargetVersion));
+
+                        if (success)
+                        {
+                            SetStatus($"Successfully patched BA2 archive to version {TargetVersion}.");
+                            _logger.LogInformation("BA2 patch completed successfully");
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("BA2 patching failed. See logs for details.");
+                        }
+                    }, _logger))
                 {
                     _logger.LogError("BA2 patch operation failed");
                 }
@@ -195,134 +197,141 @@ namespace EvilModToolkit.ViewModels
             {
                 // Execute with error handling and cancellation support provided by ViewModelBase
                 if (!await TryExecuteAsync(async () =>
-                {
-                    SetStatus("Applying xdelta patch...");
-                    _logger.LogInformation("Starting xdelta patch operation: {SourceFile} + {PatchFile}",
-                        SourceFilePath, PatchFilePath);
-
-                    // Validate inputs
-                    if (string.IsNullOrWhiteSpace(SourceFilePath))
                     {
-                        throw new InvalidOperationException("Source file path is required.");
-                    }
+                        SetStatus("Applying xdelta patch...");
+                        _logger.LogInformation("Starting xdelta patch operation: {SourceFile} + {PatchFile}",
+                            SourceFilePath, PatchFilePath);
 
-                    if (string.IsNullOrWhiteSpace(PatchFilePath))
-                    {
-                        throw new InvalidOperationException("Patch file path is required.");
-                    }
-
-                    // Validate file existence
-                    if (!File.Exists(SourceFilePath))
-                    {
-                        throw new FileNotFoundException($"Source file not found: {SourceFilePath}");
-                    }
-
-                    if (!File.Exists(PatchFilePath))
-                    {
-                        throw new FileNotFoundException($"Patch file not found: {PatchFilePath}");
-                    }
-
-                    // Validate the patch before attempting to apply
-                    SetStatus("Validating patch compatibility...");
-                    _logger.LogInformation("Validating patch: {PatchFile} for source: {SourceFile}",
-                        PatchFilePath, SourceFilePath);
-
-                    var (isValid, validationError) = await _xdeltaPatcherService.ValidatePatchAsync(
-                        SourceFilePath,
-                        PatchFilePath);
-
-                    if (!isValid)
-                    {
-                        throw new InvalidOperationException(
-                            $"Patch validation failed: {validationError}");
-                    }
-
-                    _logger.LogInformation("Patch validation successful");
-
-                    // Generate backup file path (e.g., Fallout4_patchBackup.exe)
-                    var sourceFileInfo = new FileInfo(SourceFilePath);
-                    var backupFileName = $"{Path.GetFileNameWithoutExtension(sourceFileInfo.Name)}_patchBackup{sourceFileInfo.Extension}";
-                    var backupFilePath = Path.Combine(sourceFileInfo.DirectoryName ?? string.Empty, backupFileName);
-
-                    // Generate temporary output path for the patched file
-                    var tempOutputPath = Path.Combine(
-                        sourceFileInfo.DirectoryName ?? string.Empty,
-                        $"{Path.GetFileNameWithoutExtension(sourceFileInfo.Name)}_temp{sourceFileInfo.Extension}");
-
-                    try
-                    {
-                        // Create progress reporter that updates ViewModel progress state
-                        var progress = new Progress<PatchProgress>(progressUpdate =>
+                        // Validate inputs
+                        if (string.IsNullOrWhiteSpace(SourceFilePath))
                         {
-                            // Update progress percentage
-                            ProgressPercentage = progressUpdate.Percentage;
+                            throw new InvalidOperationException("Source file path is required.");
+                        }
 
-                            // Update status message with current stage
-                            SetStatus($"{progressUpdate.Message} ({progressUpdate.Percentage}%)");
+                        if (string.IsNullOrWhiteSpace(PatchFilePath))
+                        {
+                            throw new InvalidOperationException("Patch file path is required.");
+                        }
 
-                            _logger.LogDebug("Patch progress: {Stage} - {Percentage}% - {Message}",
-                                progressUpdate.Stage, progressUpdate.Percentage, progressUpdate.Message);
-                        });
+                        // Validate file existence
+                        if (!File.Exists(SourceFilePath))
+                        {
+                            throw new FileNotFoundException($"Source file not found: {SourceFilePath}");
+                        }
 
-                        // Apply the patch to a temporary output file
-                        var result = await _xdeltaPatcherService.ApplyPatchAsync(
+                        if (!File.Exists(PatchFilePath))
+                        {
+                            throw new FileNotFoundException($"Patch file not found: {PatchFilePath}");
+                        }
+
+                        // Validate the patch before attempting to apply
+                        SetStatus("Validating patch compatibility...");
+                        _logger.LogInformation("Validating patch: {PatchFile} for source: {SourceFile}",
+                            PatchFilePath, SourceFilePath);
+
+                        var (isValid, validationError) = await _xdeltaPatcherService.ValidatePatchAsync(
                             SourceFilePath,
-                            PatchFilePath,
-                            tempOutputPath,
-                            progress,
-                            CancellationToken);
+                            PatchFilePath);
 
-                        // Check the result
-                        if (!result.Success)
+                        if (!isValid)
                         {
-                            // Patch failed - include error details in exception
                             throw new InvalidOperationException(
-                                $"Patch operation failed: {result.ErrorMessage}\n" +
-                                $"Exit Code: {result.ExitCode}\n" +
-                                $"Standard Error: {result.StandardError}");
+                                $"Patch validation failed: {validationError}");
                         }
 
-                        // Patch successful - now perform the backup and replacement
-                        SetStatus("Creating backup and replacing source file...");
-                        _logger.LogInformation("Patch successful, creating backup at: {BackupPath}", backupFilePath);
+                        _logger.LogInformation("Patch validation successful");
 
-                        // If a backup already exists, delete it
-                        if (File.Exists(backupFilePath))
+                        // Generate backup file path (e.g., Fallout4_patchBackup.exe)
+                        var sourceFileInfo = new FileInfo(SourceFilePath);
+                        var backupFileName =
+                            $"{Path.GetFileNameWithoutExtension(sourceFileInfo.Name)}_patchBackup{sourceFileInfo.Extension}";
+                        var backupFilePath = Path.Combine(sourceFileInfo.DirectoryName ?? string.Empty, backupFileName);
+
+                        // Generate temporary output path for the patched file
+                        var tempOutputPath = Path.Combine(
+                            sourceFileInfo.DirectoryName ?? string.Empty,
+                            $"{Path.GetFileNameWithoutExtension(sourceFileInfo.Name)}_temp{sourceFileInfo.Extension}");
+
+                        try
                         {
-                            _logger.LogInformation("Removing existing backup file: {BackupPath}", backupFilePath);
-                            File.Delete(backupFilePath);
+                            // Create progress reporter that updates ViewModel progress state
+                            var progress = new Progress<PatchProgress>(progressUpdate =>
+                            {
+                                // Update progress percentage
+                                ProgressPercentage = progressUpdate.Percentage;
+
+                                // Update status message with current stage
+                                SetStatus($"{progressUpdate.Message} ({progressUpdate.Percentage}%)");
+
+                                _logger.LogDebug("Patch progress: {Stage} - {Percentage}% - {Message}",
+                                    progressUpdate.Stage, progressUpdate.Percentage, progressUpdate.Message);
+                            });
+
+                            // Apply the patch to a temporary output file
+                            var result = await _xdeltaPatcherService.ApplyPatchAsync(
+                                SourceFilePath,
+                                PatchFilePath,
+                                tempOutputPath,
+                                progress,
+                                CancellationToken);
+
+                            // Check the result
+                            if (!result.Success)
+                            {
+                                // Patch failed - include error details in exception
+                                throw new InvalidOperationException(
+                                    $"Patch operation failed: {result.ErrorMessage}\n" +
+                                    $"Exit Code: {result.ExitCode}\n" +
+                                    $"Standard Error: {result.StandardError}");
+                            }
+
+                            // Patch successful - now perform the backup and replacement
+                            SetStatus("Creating backup and replacing source file...");
+                            _logger.LogInformation("Patch successful, creating backup at: {BackupPath}",
+                                backupFilePath);
+
+                            // If a backup already exists, delete it
+                            if (File.Exists(backupFilePath))
+                            {
+                                _logger.LogInformation("Removing existing backup file: {BackupPath}", backupFilePath);
+                                File.Delete(backupFilePath);
+                            }
+
+                            // Move the original file to backup
+                            File.Move(SourceFilePath, backupFilePath);
+                            _logger.LogInformation("Source file backed up to: {BackupPath}", backupFilePath);
+
+                            // Move the patched file to the original location
+                            File.Move(tempOutputPath, SourceFilePath);
+                            _logger.LogInformation("Patched file moved to: {SourcePath}", SourceFilePath);
+
+                            ProgressPercentage = 100;
+                            SetStatus($"Patch applied successfully. Backup saved as: {backupFileName}");
+                            _logger.LogInformation(
+                                "xdelta patch completed successfully. Original backed up to: {BackupPath}",
+                                backupFilePath);
                         }
-
-                        // Move the original file to backup
-                        File.Move(SourceFilePath, backupFilePath);
-                        _logger.LogInformation("Source file backed up to: {BackupPath}", backupFilePath);
-
-                        // Move the patched file to the original location
-                        File.Move(tempOutputPath, SourceFilePath);
-                        _logger.LogInformation("Patched file moved to: {SourcePath}", SourceFilePath);
-
-                        ProgressPercentage = 100;
-                        SetStatus($"Patch applied successfully. Backup saved as: {backupFileName}");
-                        _logger.LogInformation("xdelta patch completed successfully. Original backed up to: {BackupPath}", backupFilePath);
-                    }
-                    catch
-                    {
-                        // If something went wrong during backup/replacement, try to clean up temp file
-                        if (File.Exists(tempOutputPath))
+                        catch
                         {
-                            try
+                            // If something went wrong during backup/replacement, try to clean up temp file
+                            if (File.Exists(tempOutputPath))
                             {
-                                File.Delete(tempOutputPath);
-                                _logger.LogInformation("Cleaned up temporary output file: {TempPath}", tempOutputPath);
+                                try
+                                {
+                                    File.Delete(tempOutputPath);
+                                    _logger.LogInformation("Cleaned up temporary output file: {TempPath}",
+                                        tempOutputPath);
+                                }
+                                catch (Exception cleanupEx)
+                                {
+                                    _logger.LogWarning(cleanupEx, "Failed to clean up temporary file: {TempPath}",
+                                        tempOutputPath);
+                                }
                             }
-                            catch (Exception cleanupEx)
-                            {
-                                _logger.LogWarning(cleanupEx, "Failed to clean up temporary file: {TempPath}", tempOutputPath);
-                            }
+
+                            throw;
                         }
-                        throw;
-                    }
-                }, _logger))
+                    }, _logger))
                 {
                     _logger.LogError("xdelta patch operation failed");
                 }
