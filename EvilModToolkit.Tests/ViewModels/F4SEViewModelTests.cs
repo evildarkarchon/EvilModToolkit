@@ -777,9 +777,6 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _gameDetectionService.DetectGame().Returns(gameInfo);
 
-                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
                 var plugins = new List<F4SePluginInfo>
                 {
                     new F4SePluginInfo { Compatibility = F4SeCompatibility.OgOnly },
@@ -793,9 +790,14 @@ namespace EvilModToolkit.Tests.ViewModels
                 };
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>()).Returns(plugins);
 
+                // Create ViewModel (constructor won't scan because directory doesn't exist yet)
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
 
-                // Act
+                // Now create the plugin directory
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
+
+                // Act - explicitly scan
                 await viewModel.ScanPluginsCommand.Execute().FirstAsync();
 
                 // Assert
@@ -810,6 +812,112 @@ namespace EvilModToolkit.Tests.ViewModels
                 if (Directory.Exists(tempDir))
                     Directory.Delete(tempDir, true);
             }
+        }
+
+        #endregion
+
+        #region Error Handling Tests
+
+        [Fact]
+        public async Task ScanPluginsCommand_WhenScanDirectoryThrows_SetsErrorMessage()
+        {
+            // Arrange
+            var tempDir = Path.Combine(Path.GetTempPath(), "F4SEPluginTest", Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var gameInfo = new GameInfo
+                {
+                    IsInstalled = true,
+                    InstallPath = tempDir
+                };
+                _gameDetectionService.DetectGame().Returns(gameInfo);
+
+                // Create the plugin directory so scan will run
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
+
+                // Mock ScanDirectory to throw an exception
+                _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>())
+                    .Returns(callInfo => throw new UnauthorizedAccessException("Access denied to plugin directory"));
+
+                var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // Wait for constructor scan to fail
+                await Task.Delay(100);
+
+                // Act - try to scan again explicitly
+                await viewModel.ScanPluginsCommand.Execute().FirstAsync();
+
+                // Assert
+                viewModel.ErrorMessage.Should().Contain("Access denied");
+                viewModel.IsBusy.Should().BeFalse();
+                viewModel.TotalPluginCount.Should().Be(0);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir))
+                    Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Fact]
+        public async Task ScanPluginsCommand_WhenScanDirectoryThrowsIOException_SetsErrorMessage()
+        {
+            // Arrange
+            var tempDir = Path.Combine(Path.GetTempPath(), "F4SEPluginTest", Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var gameInfo = new GameInfo
+                {
+                    IsInstalled = true,
+                    InstallPath = tempDir
+                };
+                _gameDetectionService.DetectGame().Returns(gameInfo);
+
+                // Create the plugin directory so scan will run
+                var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
+                Directory.CreateDirectory(pluginDir);
+
+                // Mock ScanDirectory to throw IOException
+                _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>())
+                    .Returns(callInfo => throw new IOException("Disk read error"));
+
+                var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // Wait for constructor scan to fail
+                await Task.Delay(100);
+
+                // Act
+                await viewModel.ScanPluginsCommand.Execute().FirstAsync();
+
+                // Assert
+                viewModel.ErrorMessage.Should().Contain("Disk read error");
+                viewModel.IsBusy.Should().BeFalse();
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir))
+                    Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Fact]
+        public async Task ScanPluginsCommand_WhenDetectGameThrows_HandlesGracefully()
+        {
+            // Arrange
+            _gameDetectionService.DetectGame()
+                .Returns(callInfo => throw new InvalidOperationException("Registry access denied"));
+
+            // Act - Constructor will attempt to detect game and fail
+            var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+            // Assert - ViewModel should be created despite the error
+            viewModel.Should().NotBeNull();
+            viewModel.PluginDirectory.Should().BeEmpty();
         }
 
         #endregion

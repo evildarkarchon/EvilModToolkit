@@ -7,7 +7,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <!-- Treat platform-specific warnings as errors -->
-    <WarningsAsErrors>CA1416</WarningsAsErrors>
+    <WarningsAsErrors>CA1416,CS8620</WarningsAsErrors>
   </PropertyGroup>
 
   <!-- Trimming configuration for smaller standalone executables -->

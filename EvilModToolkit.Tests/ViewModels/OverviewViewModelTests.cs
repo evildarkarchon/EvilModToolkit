@@ -448,5 +448,146 @@ namespace EvilModToolkit.Tests.ViewModels
             // Act & Assert
             viewModel.IsModManagerDetected.Should().BeFalse();
         }
+
+        #region Error Handling Tests
+
+        [Fact]
+        public async Task RefreshCommand_WhenDetectGameThrows_SetsErrorMessage()
+        {
+            // Arrange
+            _gameDetectionService.DetectGame()
+                .Returns(callInfo => throw new UnauthorizedAccessException("Registry access denied"));
+
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+
+            _systemInfoService.GetSystemInfoAsync()
+                .Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
+
+            var viewModel = new OverviewViewModel(
+                _gameDetectionService,
+                _modManagerService,
+                _systemInfoService,
+                _ba2ArchiveService,
+                _logger);
+
+            // Wait for initial refresh to fail
+            await Task.Delay(100);
+
+            // Act - try to refresh again
+            await viewModel.RefreshCommand.Execute().FirstAsync();
+
+            // Assert
+            viewModel.ErrorMessage.Should().Contain("Registry access denied");
+            viewModel.IsBusy.Should().BeFalse();
+            viewModel.GameInfo.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task RefreshCommand_WhenDetectModManagerThrows_SetsErrorMessage()
+        {
+            // Arrange
+            _gameDetectionService.DetectGame()
+                .Returns(new GameInfo { IsInstalled = false });
+
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromException<ModManagerInfo>(new IOException("Cannot access program files")));
+
+            _systemInfoService.GetSystemInfoAsync()
+                .Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
+
+            var viewModel = new OverviewViewModel(
+                _gameDetectionService,
+                _modManagerService,
+                _systemInfoService,
+                _ba2ArchiveService,
+                _logger);
+
+            // Wait for initial refresh to fail
+            await Task.Delay(100);
+
+            // Act
+            await viewModel.RefreshCommand.Execute().FirstAsync();
+
+            // Assert
+            viewModel.ErrorMessage.Should().Contain("Cannot access program files");
+            viewModel.IsBusy.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task RefreshCommand_WhenGetSystemInfoThrows_SetsErrorMessage()
+        {
+            // Arrange
+            _gameDetectionService.DetectGame()
+                .Returns(new GameInfo { IsInstalled = false });
+
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+
+            _systemInfoService.GetSystemInfoAsync()
+                .Returns(Task.FromException<SystemInfo?>(new InvalidOperationException("WMI query failed")));
+
+            var viewModel = new OverviewViewModel(
+                _gameDetectionService,
+                _modManagerService,
+                _systemInfoService,
+                _ba2ArchiveService,
+                _logger);
+
+            // Wait for initial refresh to fail
+            await Task.Delay(100);
+
+            // Act
+            await viewModel.RefreshCommand.Execute().FirstAsync();
+
+            // Assert
+            viewModel.ErrorMessage.Should().Contain("WMI query failed");
+            viewModel.IsBusy.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task RefreshCommand_WhenBA2ScanThrows_ContinuesAndSetsError()
+        {
+            // Arrange
+            var gameInfo = new GameInfo
+            {
+                IsInstalled = true,
+                InstallPath = @"C:\Games\Fallout 4",
+                DataPath = @"C:\Games\Fallout 4\Data"
+            };
+
+            _gameDetectionService.DetectGame().Returns(gameInfo);
+
+            _modManagerService.DetectModManagerAsync()
+                .Returns(Task.FromResult(new ModManagerInfo { Type = ModManagerType.None }));
+
+            _systemInfoService.GetSystemInfoAsync()
+                .Returns(Task.FromResult<SystemInfo?>(new SystemInfo()));
+
+            // Mock GetArchiveInfo to throw exception
+            _ba2ArchiveService.GetArchiveInfo(Arg.Any<string>())
+                .Returns(callInfo => throw new UnauthorizedAccessException("Access denied to BA2 files"));
+
+            var viewModel = new OverviewViewModel(
+                _gameDetectionService,
+                _modManagerService,
+                _systemInfoService,
+                _ba2ArchiveService,
+                _logger);
+
+            // Wait for initial refresh to complete
+            await Task.Delay(200);
+
+            // Act
+            await viewModel.RefreshCommand.Execute().FirstAsync();
+
+            // Assert - BA2 scanning should not prevent the rest of refresh from completing
+            viewModel.GameInfo.Should().NotBeNull();
+            viewModel.GameInfo?.IsInstalled.Should().BeTrue();
+            // BA2 counts should be 0 due to scanning failure
+            viewModel.BA2CountTotal.Should().Be(0);
+        }
+
+        #endregion
     }
 }

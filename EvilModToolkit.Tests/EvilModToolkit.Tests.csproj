@@ -7,7 +7,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <!-- Treat platform-specific warnings as errors -->
-    <WarningsAsErrors>CA1416</WarningsAsErrors>
+    <WarningsAsErrors>CA1416,CS8620</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
