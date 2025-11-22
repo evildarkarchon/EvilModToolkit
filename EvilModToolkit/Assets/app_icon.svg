@@ -1,0 +1,65 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Phoenix Gradient: Vibrant Fire -->
+    <linearGradient id="phoenixGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#FF4500" />
+      <stop offset="40%" stop-color="#FF8C00" />
+      <stop offset="100%" stop-color="#FFD700" />
+    </linearGradient>
+    
+    <!-- Wolf Gradient: Cool Steel/Ice -->
+    <linearGradient id="wolfGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#A0B0C0" />
+      <stop offset="100%" stop-color="#2C3E50" />
+    </linearGradient>
+    
+    <!-- Background: Deep Night -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="70%" stop-color="#1a1a1a" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Glow Filter for Phoenix -->
+    <filter id="fireGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="#333" stroke-width="2"/>
+
+  <!-- Phoenix: Sharper, Avian, Rising -->
+  <g filter="url(#fireGlow)" transform="translate(0, -30)">
+    <!-- Wings and Body: Stylized Flame Feathers -->
+    <path d="M256 320 L 230 260 L 150 280 L 60 160 L 160 180 L 200 160 L 240 170 L 240 120 L 220 100 L 256 70 L 292 100 L 272 120 L 272 170 L 312 160 L 352 180 L 452 160 L 362 280 L 282 260 L 256 320 Z" fill="url(#phoenixGrad)" opacity="0.95"/>
+    
+    <!-- Head Detail: Beak and Crest -->
+    <path d="M256 70 L 275 100 L 256 140 L 237 100 Z" fill="#FFFFA0" opacity="0.8"/>
+  </g>
+
+  <!-- Wolf: Geometric, Fur Ruffs, Stronger Silhouette -->
+  <g transform="translate(0, 60)">
+    <!-- Main Head Shape with Cheek Ruffs -->
+    <path d="M256 400 L 220 370 L 180 360 L 140 280 L 120 140 L 180 200 L 256 180 L 332 200 L 392 140 L 372 280 L 332 360 L 292 370 L 256 400 Z" fill="url(#wolfGrad)" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+    
+    <!-- Inner Ear Depth -->
+    <path d="M120 140 L 150 210 L 175 205 Z" fill="#2C3E50"/>
+    <path d="M392 140 L 362 210 L 337 205 Z" fill="#2C3E50"/>
+
+    <!-- Snout Definition -->
+    <path d="M220 280 L 292 280 L 275 360 L 237 360 Z" fill="#556677" opacity="0.6"/>
+    
+    <!-- Nose -->
+    <path d="M237 360 L 275 360 L 256 385 Z" fill="#111"/>
+
+    <!-- Eyes: Aggressive/Alert Slit -->
+    <path d="M180 260 L 220 275 L 185 280 Z" fill="#FFD700"/>
+    <path d="M332 260 L 292 275 L 327 280 Z" fill="#FFD700"/>
+    
+    <!-- Forehead/Brow Ridge Lines -->
+    <path d="M256 180 L 256 260" stroke="#2C3E50" stroke-width="2"/>
+    <path d="M220 275 L 256 290 L 292 275" fill="none" stroke="#2C3E50" stroke-width="2"/>
+  </g>
+
+</svg>

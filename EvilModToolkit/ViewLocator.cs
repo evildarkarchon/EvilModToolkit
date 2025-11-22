@@ -30,6 +30,7 @@ namespace EvilModToolkit
                 MainWindowViewModel vm => new MainWindow { DataContext = vm },
                 OverviewViewModel vm => new OverviewView { DataContext = vm },
                 F4SEViewModel vm => new F4SEView { DataContext = vm },
+                ScannerViewModel vm => new ScannerView { DataContext = vm },
                 ToolsViewModel vm => new ToolsView { DataContext = vm },
                 SettingsViewModel vm => new SettingsView { DataContext = vm },
 

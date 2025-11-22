@@ -478,3 +478,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 .idea
+
+.gemini/
+gha-creds-*.json
+EvilModToolkit.code-workspace

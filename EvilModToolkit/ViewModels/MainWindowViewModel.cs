@@ -17,6 +17,7 @@ namespace EvilModToolkit.ViewModels
         // Child ViewModels for each tab - injected via DI and owned by this ViewModel
         private readonly OverviewViewModel _overviewViewModel;
         private readonly F4SEViewModel _f4seViewModel;
+        private readonly ScannerViewModel _scannerViewModel;
         private readonly SettingsViewModel _settingsViewModel;
         private readonly ToolsViewModel _toolsViewModel;
 
@@ -30,13 +31,15 @@ namespace EvilModToolkit.ViewModels
         /// </summary>
         /// <param name="overviewViewModel">ViewModel for the Overview tab (Tab 0).</param>
         /// <param name="f4seViewModel">ViewModel for the F4SE Scanner tab (Tab 1).</param>
-        /// <param name="settingsViewModel">ViewModel for the Settings tab (Tab 3).</param>
-        /// <param name="toolsViewModel">ViewModel for the Tools/Patcher tab (Tab 2).</param>
+        /// <param name="scannerViewModel">ViewModel for the Mod Scanner tab (Tab 2).</param>
+        /// <param name="settingsViewModel">ViewModel for the Settings tab (Tab 4).</param>
+        /// <param name="toolsViewModel">ViewModel for the Tools/Patcher tab (Tab 3).</param>
         /// <param name="logger">Logger for diagnostic messages.</param>
         /// <exception cref="ArgumentNullException">Thrown when any required dependency is null.</exception>
         public MainWindowViewModel(
             OverviewViewModel overviewViewModel,
             F4SEViewModel f4seViewModel,
+            ScannerViewModel scannerViewModel,
             SettingsViewModel settingsViewModel,
             ToolsViewModel toolsViewModel,
             ILogger<MainWindowViewModel> logger)
@@ -44,6 +47,7 @@ namespace EvilModToolkit.ViewModels
             // Validate all dependencies - fail fast if any are missing
             _overviewViewModel = overviewViewModel ?? throw new ArgumentNullException(nameof(overviewViewModel));
             _f4seViewModel = f4seViewModel ?? throw new ArgumentNullException(nameof(f4seViewModel));
+            _scannerViewModel = scannerViewModel ?? throw new ArgumentNullException(nameof(scannerViewModel));
             _settingsViewModel = settingsViewModel ?? throw new ArgumentNullException(nameof(settingsViewModel));
             _toolsViewModel = toolsViewModel ?? throw new ArgumentNullException(nameof(toolsViewModel));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -77,13 +81,19 @@ namespace EvilModToolkit.ViewModels
         public F4SEViewModel F4SEViewModel => _f4seViewModel;
 
         /// <summary>
-        /// Gets the ViewModel for the Tools/Patcher tab (Tab 2).
+        /// Gets the ViewModel for the Mod Scanner tab (Tab 2).
+        /// Scans mod files for issues.
+        /// </summary>
+        public ScannerViewModel ScannerViewModel => _scannerViewModel;
+
+        /// <summary>
+        /// Gets the ViewModel for the Tools/Patcher tab (Tab 3).
         /// Provides BA2 archive patching and xdelta game file patching.
         /// </summary>
         public ToolsViewModel ToolsViewModel => _toolsViewModel;
 
         /// <summary>
-        /// Gets the ViewModel for the Settings tab (Tab 3).
+        /// Gets the ViewModel for the Settings tab (Tab 4).
         /// Allows configuration of application preferences.
         /// </summary>
         public SettingsViewModel SettingsViewModel => _settingsViewModel;
@@ -94,7 +104,6 @@ namespace EvilModToolkit.ViewModels
 
         /// <summary>
         /// Gets or sets the currently selected tab index.
-        /// Tab 0: Overview, Tab 1: F4SE Scanner, Tab 2: Tools/Patcher, Tab 3: Settings.
         /// </summary>
         public int SelectedTabIndex
         {
@@ -151,8 +160,9 @@ namespace EvilModToolkit.ViewModels
         {
             0 => "Overview",
             1 => "F4SE Scanner",
-            2 => "Tools/Patcher",
-            3 => "Settings",
+            2 => "Mod Scanner",
+            3 => "Tools/Patcher",
+            4 => "Settings",
             _ => "Unknown"
         };
 
@@ -200,6 +210,7 @@ namespace EvilModToolkit.ViewModels
                 // and owned by this ViewModel
                 _overviewViewModel?.Dispose();
                 _f4seViewModel?.Dispose();
+                _scannerViewModel?.Dispose();
                 _settingsViewModel?.Dispose();
                 _toolsViewModel?.Dispose();
 

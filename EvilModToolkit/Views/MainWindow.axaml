@@ -53,6 +53,9 @@
             <TabItem Header="F4SE Scanner">
                 <views:F4SEView DataContext="{Binding F4SEViewModel}" />
             </TabItem>
+            <TabItem Header="Mod Scanner">
+                <views:ScannerView DataContext="{Binding ScannerViewModel}" />
+            </TabItem>
             <TabItem Header="Tools">
                 <views:ToolsView DataContext="{Binding ToolsViewModel}" />
             </TabItem>

@@ -9,7 +9,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -27,6 +26,7 @@ namespace EvilModToolkit.Tests.ViewModels
         private readonly IModManagerService _modManagerService;
         private readonly ISystemInfoService _systemInfoService;
         private readonly IF4SEPluginService _pluginService;
+        private readonly IModScannerService _modScannerService;
         private readonly ISettingsService _settingsService;
         private readonly IDialogService _dialogService;
         private readonly IBA2ArchiveService _ba2ArchiveService;
@@ -35,6 +35,7 @@ namespace EvilModToolkit.Tests.ViewModels
         // Loggers for all ViewModels
         private readonly ILogger<OverviewViewModel> _overviewLogger;
         private readonly ILogger<F4SEViewModel> _f4seLogger;
+        private readonly ILogger<ScannerViewModel> _scannerLogger;
         private readonly ILogger<SettingsViewModel> _settingsLogger;
         private readonly ILogger<ToolsViewModel> _toolsLogger;
         private readonly ILogger<MainWindowViewModel> _mainLogger;
@@ -46,6 +47,7 @@ namespace EvilModToolkit.Tests.ViewModels
             _modManagerService = Substitute.For<IModManagerService>();
             _systemInfoService = Substitute.For<ISystemInfoService>();
             _pluginService = Substitute.For<IF4SEPluginService>();
+            _modScannerService = Substitute.For<IModScannerService>();
             _settingsService = Substitute.For<ISettingsService>();
             _dialogService = Substitute.For<IDialogService>();
             _ba2ArchiveService = Substitute.For<IBA2ArchiveService>();
@@ -54,6 +56,7 @@ namespace EvilModToolkit.Tests.ViewModels
             // Create mock loggers
             _overviewLogger = Substitute.For<ILogger<OverviewViewModel>>();
             _f4seLogger = Substitute.For<ILogger<F4SEViewModel>>();
+            _scannerLogger = Substitute.For<ILogger<ScannerViewModel>>();
             _settingsLogger = Substitute.For<ILogger<SettingsViewModel>>();
             _toolsLogger = Substitute.For<ILogger<ToolsViewModel>>();
             _mainLogger = Substitute.For<ILogger<MainWindowViewModel>>();
@@ -71,7 +74,7 @@ namespace EvilModToolkit.Tests.ViewModels
         /// Creates real child ViewModels with mocked dependencies.
         /// This approach is necessary because ViewModels are concrete classes.
         /// </summary>
-        private (OverviewViewModel overview, F4SEViewModel f4se, SettingsViewModel settings, ToolsViewModel tools)
+        private (OverviewViewModel overview, F4SEViewModel f4se, ScannerViewModel scanner, SettingsViewModel settings, ToolsViewModel tools)
             CreateChildViewModels()
         {
             var overview = new OverviewViewModel(
@@ -85,6 +88,12 @@ namespace EvilModToolkit.Tests.ViewModels
                 _pluginService,
                 _gameDetectionService,
                 _f4seLogger);
+            
+            var scanner = new ScannerViewModel(
+                _modScannerService,
+                _gameDetectionService,
+                _modManagerService,
+                _scannerLogger);
 
             var settings = new SettingsViewModel(
                 _settingsService,
@@ -96,7 +105,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _xdeltaPatcherService,
                 _toolsLogger);
 
-            return (overview, f4se, settings, tools);
+            return (overview, f4se, scanner, settings, tools);
         }
 
         #region Constructor Tests
@@ -105,12 +114,13 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task Constructor_InitializesPropertiesCorrectly()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
 
             // Act
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -122,6 +132,7 @@ namespace EvilModToolkit.Tests.ViewModels
             viewModel.Should().NotBeNull();
             viewModel.OverviewViewModel.Should().BeSameAs(overview);
             viewModel.F4SEViewModel.Should().BeSameAs(f4se);
+            viewModel.ScannerViewModel.Should().BeSameAs(scanner);
             viewModel.SettingsViewModel.Should().BeSameAs(settings);
             viewModel.ToolsViewModel.Should().BeSameAs(tools);
             viewModel.WindowTitle.Should().Be("Evil Modding Toolkit");
@@ -132,12 +143,13 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_InitializesCommands()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
 
             // Act
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -151,12 +163,13 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_ThrowsArgumentNullException_WhenOverviewViewModelIsNull()
         {
             // Arrange
-            var (_, f4se, settings, tools) = CreateChildViewModels();
+            var (_, f4se, scanner, settings, tools) = CreateChildViewModels();
 
             // Act
             Action act = () => new MainWindowViewModel(
                 null!,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -170,12 +183,13 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_ThrowsArgumentNullException_WhenF4SEViewModelIsNull()
         {
             // Arrange
-            var (overview, _, settings, tools) = CreateChildViewModels();
+            var (overview, _, scanner, settings, tools) = CreateChildViewModels();
 
             // Act
             Action act = () => new MainWindowViewModel(
                 overview,
                 null!,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -184,17 +198,38 @@ namespace EvilModToolkit.Tests.ViewModels
             act.Should().Throw<ArgumentNullException>()
                 .WithParameterName("f4seViewModel");
         }
-
+        
         [Fact]
-        public void Constructor_ThrowsArgumentNullException_WhenSettingsViewModelIsNull()
+        public void Constructor_ThrowsArgumentNullException_WhenScannerViewModelIsNull()
         {
             // Arrange
-            var (overview, f4se, _, tools) = CreateChildViewModels();
+            var (overview, f4se, _, settings, tools) = CreateChildViewModels();
 
             // Act
             Action act = () => new MainWindowViewModel(
                 overview,
                 f4se,
+                null!,
+                settings,
+                tools,
+                _mainLogger);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("scannerViewModel");
+        }
+
+        [Fact]
+        public void Constructor_ThrowsArgumentNullException_WhenSettingsViewModelIsNull()
+        {
+            // Arrange
+            var (overview, f4se, scanner, _, tools) = CreateChildViewModels();
+
+            // Act
+            Action act = () => new MainWindowViewModel(
+                overview,
+                f4se,
+                scanner,
                 null!,
                 tools,
                 _mainLogger);
@@ -208,12 +243,13 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_ThrowsArgumentNullException_WhenToolsViewModelIsNull()
         {
             // Arrange
-            var (overview, f4se, settings, _) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, _) = CreateChildViewModels();
 
             // Act
             Action act = () => new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 null!,
                 _mainLogger);
@@ -227,12 +263,13 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Constructor_ThrowsArgumentNullException_WhenLoggerIsNull()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
 
             // Act
             Action act = () => new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 null!);
@@ -250,16 +287,17 @@ namespace EvilModToolkit.Tests.ViewModels
         public void SelectedTabIndex_CanBeSetAndGet()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
 
             // Act
-            viewModel.SelectedTabIndex = 2; // Switch to Tools tab
+            viewModel.SelectedTabIndex = 2; // Switch to Mod Scanner tab
 
             // Assert
             viewModel.SelectedTabIndex.Should().Be(2);
@@ -269,10 +307,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public void SelectedTabIndex_RaisesPropertyChangedNotification()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -295,10 +334,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public void WindowTitle_CanBeSetAndGet()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -314,10 +354,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public void WindowTitle_RaisesPropertyChangedNotification()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -344,10 +385,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task ExitCommand_CanExecute()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -363,10 +405,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task ExitCommand_ExecutesWithoutException()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -382,10 +425,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task ExitCommand_SetsStatusMessage()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -402,10 +446,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task AboutCommand_CanExecute()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -421,10 +466,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task AboutCommand_ExecutesWithoutException()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -440,10 +486,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task AboutCommand_SetsStatusMessage()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -464,10 +511,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Dispose_DisposesChildViewModels()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);
@@ -482,6 +530,7 @@ namespace EvilModToolkit.Tests.ViewModels
             // when commands are accessed (disposed commands should not throw, just not execute)
             overview.RefreshCommand.Should().NotBeNull();
             f4se.ScanPluginsCommand.Should().NotBeNull();
+            scanner.ScanCommand.Should().NotBeNull();
             settings.SaveSettingsCommand.Should().NotBeNull();
             tools.PatchBA2Command.Should().NotBeNull();
         }
@@ -490,10 +539,11 @@ namespace EvilModToolkit.Tests.ViewModels
         public void Dispose_CanBeCalledMultipleTimes()
         {
             // Arrange
-            var (overview, f4se, settings, tools) = CreateChildViewModels();
+            var (overview, f4se, scanner, settings, tools) = CreateChildViewModels();
             var viewModel = new MainWindowViewModel(
                 overview,
                 f4se,
+                scanner,
                 settings,
                 tools,
                 _mainLogger);

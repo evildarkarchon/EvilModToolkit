@@ -85,6 +85,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddAnalysisServices(this IServiceCollection services)
     {
         services.AddTransient<IF4SEPluginService, F4SePluginService>();
+        services.AddTransient<IModScannerService, ModScannerService>();
 
         return services;
     }
@@ -123,9 +124,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<F4SEViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<ToolsViewModel>();
-
-        // TODO: Add other ViewModels as they are created in Phase 4:
-        // services.AddTransient<ScannerViewModel>();
+        services.AddTransient<ScannerViewModel>();
 
         return services;
     }

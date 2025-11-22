@@ -44,6 +44,7 @@ public class DependencyInjectionTests : IDisposable
 
         // Register Analysis Services (Transient)
         services.AddTransient<IF4SEPluginService, F4SePluginService>();
+        services.AddTransient<IModScannerService, ModScannerService>();
 
         // Register Patching Services (Transient)
         services.AddTransient<IBA2ArchiveService, BA2ArchiveService>();
@@ -59,6 +60,7 @@ public class DependencyInjectionTests : IDisposable
         services.AddTransient<F4SEViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<ToolsViewModel>();
+        services.AddTransient<ScannerViewModel>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
