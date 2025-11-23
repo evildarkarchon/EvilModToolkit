@@ -1,5 +1,6 @@
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Patching;
+using EvilModToolkit.Services.Platform;
 using EvilModToolkit.ViewModels;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -22,12 +23,14 @@ namespace EvilModToolkit.Tests.ViewModels
     {
         private readonly IBA2ArchiveService _ba2ArchiveService;
         private readonly IXDeltaPatcherService _xdeltaPatcherService;
+        private readonly IDialogService _dialogService;
         private readonly ILogger<ToolsViewModel> _logger;
 
         public ToolsViewModelTests()
         {
             _ba2ArchiveService = Substitute.For<IBA2ArchiveService>();
             _xdeltaPatcherService = Substitute.For<IXDeltaPatcherService>();
+            _dialogService = Substitute.For<IDialogService>();
             _logger = Substitute.For<ILogger<ToolsViewModel>>();
         }
 
@@ -40,6 +43,7 @@ namespace EvilModToolkit.Tests.ViewModels
             var viewModel = new ToolsViewModel(
                 _ba2ArchiveService,
                 _xdeltaPatcherService,
+                _dialogService,
                 _logger);
 
             // Assert
@@ -50,6 +54,9 @@ namespace EvilModToolkit.Tests.ViewModels
             viewModel.PatchFilePath.Should().BeEmpty();
             viewModel.PatchBA2Command.Should().NotBeNull();
             viewModel.ApplyPatchCommand.Should().NotBeNull();
+            viewModel.BrowseSourceBA2Command.Should().NotBeNull();
+            viewModel.BrowseSourceFileCommand.Should().NotBeNull();
+            viewModel.BrowsePatchFileCommand.Should().NotBeNull();
         }
 
         [Fact]
@@ -59,6 +66,7 @@ namespace EvilModToolkit.Tests.ViewModels
             Action act = () => new ToolsViewModel(
                 null!,
                 _xdeltaPatcherService,
+                _dialogService,
                 _logger);
 
             // Assert
@@ -73,11 +81,27 @@ namespace EvilModToolkit.Tests.ViewModels
             Action act = () => new ToolsViewModel(
                 _ba2ArchiveService,
                 null!,
+                _dialogService,
                 _logger);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
                 .WithParameterName("xdeltaPatcherService");
+        }
+
+        [Fact]
+        public void Constructor_ThrowsArgumentNullException_WhenDialogServiceIsNull()
+        {
+            // Act
+            Action act = () => new ToolsViewModel(
+                _ba2ArchiveService,
+                _xdeltaPatcherService,
+                null!,
+                _logger);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("dialogService");
         }
 
         [Fact]
@@ -87,6 +111,7 @@ namespace EvilModToolkit.Tests.ViewModels
             Action act = () => new ToolsViewModel(
                 _ba2ArchiveService,
                 _xdeltaPatcherService,
+                _dialogService,
                 null!);
 
             // Assert
@@ -102,7 +127,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public void SourceBA2Path_CanBeSetAndRetrieved()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             var testPath = @"C:\Games\Fallout4\Data\TestArchive.ba2";
 
             // Act
@@ -116,7 +141,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public void TargetVersion_CanBeSetAndRetrieved()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
 
             // Act
             viewModel.TargetVersion = BA2Version.V8;
@@ -129,7 +154,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public void SourceFilePath_CanBeSetAndRetrieved()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             var testPath = @"C:\Games\Fallout4\Fallout4.exe";
 
             // Act
@@ -143,7 +168,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public void PatchFilePath_CanBeSetAndRetrieved()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             var testPath = @"C:\Patches\game_patch.xdelta";
 
             // Act
@@ -161,7 +186,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task PatchBA2Command_ThrowsInvalidOperationException_WhenSourceBA2PathIsEmpty()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             viewModel.SourceBA2Path = string.Empty;
 
             // Act
@@ -175,7 +200,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task PatchBA2Command_SetsError_WhenSourceBA2FileNotFound()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             viewModel.SourceBA2Path = @"C:\NonExistent\Archive.ba2";
             viewModel.TargetVersion = BA2Version.V8;
 
@@ -198,7 +223,7 @@ namespace EvilModToolkit.Tests.ViewModels
             {
                 _ba2ArchiveService.IsValidBA2(tempFile).Returns(false);
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -233,7 +258,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 });
                 _ba2ArchiveService.PatchArchiveVersion(tempFile, BA2Version.V8).Returns(true);
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -268,7 +293,7 @@ namespace EvilModToolkit.Tests.ViewModels
                     IsValid = true
                 });
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -303,7 +328,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 });
                 _ba2ArchiveService.PatchArchiveVersion(tempFile, BA2Version.V8).Returns(false);
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -343,7 +368,7 @@ namespace EvilModToolkit.Tests.ViewModels
                     return true;
                 });
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -375,7 +400,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task ApplyPatchCommand_SetsError_WhenSourceFilePathIsEmpty()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             viewModel.SourceFilePath = string.Empty;
             viewModel.PatchFilePath = @"C:\patch.xdelta";
 
@@ -390,7 +415,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task ApplyPatchCommand_SetsError_WhenPatchFilePathIsEmpty()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             viewModel.SourceFilePath = @"C:\source.exe";
             viewModel.PatchFilePath = string.Empty;
 
@@ -405,7 +430,7 @@ namespace EvilModToolkit.Tests.ViewModels
         public async Task ApplyPatchCommand_SetsError_WhenSourceFileNotFound()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
             viewModel.SourceFilePath = @"C:\NonExistent\source.exe";
             viewModel.PatchFilePath = @"C:\patch.xdelta";
 
@@ -423,7 +448,7 @@ namespace EvilModToolkit.Tests.ViewModels
             var tempSourceFile = Path.GetTempFileName();
             try
             {
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = @"C:\NonExistent\patch.xdelta";
 
@@ -452,7 +477,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _xdeltaPatcherService.ValidatePatchAsync(tempSourceFile, tempPatchFile)
                     .Returns(Task.FromResult((false, (string?)"xdelta3.exe not found")));
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
 
@@ -509,7 +534,7 @@ namespace EvilModToolkit.Tests.ViewModels
                         });
                     });
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
 
@@ -607,7 +632,7 @@ namespace EvilModToolkit.Tests.ViewModels
                         return new PatchResult { Success = true, OutputFilePath = outputPath };
                     });
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
 
@@ -657,7 +682,7 @@ namespace EvilModToolkit.Tests.ViewModels
                         StandardError = "Error details"
                     }));
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
 
@@ -701,7 +726,7 @@ namespace EvilModToolkit.Tests.ViewModels
                         return new PatchResult { Success = true };
                     });
 
-                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
                 viewModel.SourceFilePath = tempSourceFile;
                 viewModel.PatchFilePath = tempPatchFile;
 
@@ -731,13 +756,98 @@ namespace EvilModToolkit.Tests.ViewModels
 
         #endregion
 
+        #region Browse Commands Tests
+
+        [Fact]
+        public async Task BrowseSourceBA2Command_UpdatesSourceBA2Path_WhenFileSelected()
+        {
+            // Arrange
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+            var selectedFile = @"C:\Archives\Test.ba2";
+
+            _dialogService.ShowFilePickerAsync(
+                Arg.Any<string>(), 
+                Arg.Any<string>(), 
+                Arg.Any<string[]>())
+                .Returns(Task.FromResult((string?)selectedFile));
+
+            // Act
+            await viewModel.BrowseSourceBA2Command.Execute().FirstAsync();
+
+            // Assert
+            viewModel.SourceBA2Path.Should().Be(selectedFile);
+        }
+
+        [Fact]
+        public async Task BrowseSourceBA2Command_DoesNotUpdatePath_WhenCancelled()
+        {
+            // Arrange
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+            var initialPath = @"C:\Initial\Path.ba2";
+            viewModel.SourceBA2Path = initialPath;
+
+            _dialogService.ShowFilePickerAsync(
+                Arg.Any<string>(), 
+                Arg.Any<string>(), 
+                Arg.Any<string[]>())
+                .Returns(Task.FromResult<string?>(null));
+
+            // Act
+            await viewModel.BrowseSourceBA2Command.Execute().FirstAsync();
+
+            // Assert
+            viewModel.SourceBA2Path.Should().Be(initialPath);
+        }
+
+        [Fact]
+        public async Task BrowseSourceFileCommand_UpdatesSourceFilePath_WhenFileSelected()
+        {
+            // Arrange
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+            var selectedFile = @"C:\Games\Fallout4.exe";
+
+            _dialogService.ShowFilePickerAsync(
+                Arg.Any<string>(), 
+                Arg.Any<string>(), 
+                Arg.Any<string[]>())
+                .Returns(Task.FromResult((string?)selectedFile));
+
+            // Act
+            await viewModel.BrowseSourceFileCommand.Execute().FirstAsync();
+
+            // Assert
+            viewModel.SourceFilePath.Should().Be(selectedFile);
+        }
+
+        [Fact]
+        public async Task BrowsePatchFileCommand_UpdatesPatchFilePath_WhenFileSelected()
+        {
+            // Arrange
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+            var selectedFile = @"C:\Patches\patch.xdelta";
+
+            _dialogService.ShowFilePickerAsync(
+                Arg.Any<string>(), 
+                Arg.Any<string>(), 
+                Arg.Any<string[]>())
+                .Returns(Task.FromResult((string?)selectedFile));
+
+            // Act
+            await viewModel.BrowsePatchFileCommand.Execute().FirstAsync();
+
+            // Assert
+            viewModel.PatchFilePath.Should().Be(selectedFile);
+        }
+
+        #endregion
+
         #region Dispose Tests
 
         [Fact]
         public void Dispose_DisposesCommands()
         {
             // Arrange
-            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _logger);
+            var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
 
             // Act
             viewModel.Dispose();

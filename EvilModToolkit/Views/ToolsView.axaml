@@ -19,92 +19,120 @@
                        FontSize="24"
                        FontWeight="Bold" />
 
-            <!-- BA2 Archive Patcher Section -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    Padding="15"
-                    CornerRadius="5">
-                <StackPanel Spacing="15">
-                    <TextBlock Text="BA2 Archive Version Patcher"
-                               FontSize="18"
-                               FontWeight="SemiBold" />
-                    <TextBlock Text="Convert BA2 archives between different format versions (v1, v7, v8)"
-                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                               TextWrapping="Wrap" />
+            <!-- Tools Grid -->
+            <Grid ColumnDefinitions="*,20,*" RowDefinitions="Auto">
+                
+                <!-- BA2 Archive Patcher Section -->
+                <Border Grid.Column="0"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                        BorderThickness="1"
+                        Padding="15"
+                        CornerRadius="5"
+                        VerticalAlignment="Top">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="BA2 Archive Version Patcher"
+                                   FontSize="18"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Convert BA2 archives between different format versions (v1, v7, v8)"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                   TextWrapping="Wrap" />
 
-                    <!-- Source BA2 File -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Source BA2 Archive:" />
-                        <TextBox Text="{Binding SourceBA2Path}"
-                                 Watermark="Select a BA2 archive file to patch..."
-                                 IsReadOnly="False" />
+                        <!-- Source BA2 File -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Source BA2 Archive:" />
+                            <Grid ColumnDefinitions="*,10,Auto">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding SourceBA2Path}"
+                                         Watermark="Select a BA2 archive file..."
+                                         IsReadOnly="False" />
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Command="{Binding BrowseSourceBA2Command}" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Target Version Selection -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Target Version:" />
+                            <ComboBox SelectedItem="{Binding TargetVersion}"
+                                      HorizontalAlignment="Stretch"
+                                      MinWidth="200">
+                                <ComboBoxItem Content="Version 1 (Original Game)" />
+                                <ComboBoxItem Content="Version 7" />
+                                <ComboBoxItem Content="Version 8 (Next Gen)" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Patch Button -->
+                        <Button Content="Patch BA2 Archive"
+                                Command="{Binding PatchBA2Command}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Padding="20,8" />
                     </StackPanel>
+                </Border>
 
-                    <!-- Target Version Selection -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Target Version:" />
-                        <ComboBox SelectedItem="{Binding TargetVersion}"
-                                  HorizontalAlignment="Left"
-                                  MinWidth="200">
-                            <ComboBoxItem Content="Version 1 (Original Game)" />
-                            <ComboBoxItem Content="Version 7" />
-                            <ComboBoxItem Content="Version 8 (Next Gen)" />
-                        </ComboBox>
+                <!-- XDelta Game Patcher Section -->
+                <Border Grid.Column="2"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                        BorderThickness="1"
+                        Padding="15"
+                        CornerRadius="5"
+                        VerticalAlignment="Top">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="Game File Patcher (XDelta)"
+                                   FontSize="18"
+                                   FontWeight="SemiBold" />
+                        <TextBlock
+                            Text="Apply xdelta patches to game files in-place with automatic backup."
+                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                            TextWrapping="Wrap" />
+
+                        <!-- Source File -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Source File to Patch:" />
+                            <Grid ColumnDefinitions="*,10,Auto">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding SourceFilePath}"
+                                         Watermark="Select file (e.g., Fallout4.exe)..."
+                                         IsReadOnly="False" />
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Command="{Binding BrowseSourceFileCommand}" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Patch File -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Delta Patch File (.xdelta):" />
+                            <Grid ColumnDefinitions="*,10,Auto">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding PatchFilePath}"
+                                         Watermark="Select patch file..."
+                                         IsReadOnly="False" />
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Command="{Binding BrowsePatchFileCommand}" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Info about backup -->
+                        <TextBlock Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                   FontStyle="Italic"
+                                   FontSize="12"
+                                   TextWrapping="Wrap">
+                            <Run Text="ℹ Original file backed up as *_patchBackup" />
+                        </TextBlock>
+
+                        <!-- Apply Patch Button -->
+                        <Button Content="Apply Patch"
+                                Command="{Binding ApplyPatchCommand}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Padding="20,8" />
                     </StackPanel>
-
-                    <!-- Patch Button -->
-                    <Button Content="Patch BA2 Archive"
-                            Command="{Binding PatchBA2Command}"
-                            HorizontalAlignment="Left"
-                            Padding="20,8" />
-                </StackPanel>
-            </Border>
-
-            <!-- XDelta Game Patcher Section -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    Padding="15"
-                    CornerRadius="5">
-                <StackPanel Spacing="15">
-                    <TextBlock Text="Game File Patcher (XDelta)"
-                               FontSize="18"
-                               FontWeight="SemiBold" />
-                    <TextBlock
-                        Text="Apply xdelta patches to game files. The patch will be applied in-place with automatic backup creation."
-                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                        TextWrapping="Wrap" />
-
-                    <!-- Source File -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Source File to Patch:" />
-                        <TextBox Text="{Binding SourceFilePath}"
-                                 Watermark="Select the file to patch (e.g., Fallout4.exe)..."
-                                 IsReadOnly="False" />
-                    </StackPanel>
-
-                    <!-- Patch File -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Delta Patch File (.xdelta):" />
-                        <TextBox Text="{Binding PatchFilePath}"
-                                 Watermark="Select the xdelta patch file..."
-                                 IsReadOnly="False" />
-                    </StackPanel>
-
-                    <!-- Info about backup -->
-                    <TextBlock Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                               FontStyle="Italic"
-                               TextWrapping="Wrap">
-                        <Run
-                            Text="ℹ The original file will be backed up automatically (e.g., Fallout4_patchBackup.exe)" />
-                    </TextBlock>
-
-                    <!-- Apply Patch Button -->
-                    <Button Content="Apply Patch"
-                            Command="{Binding ApplyPatchCommand}"
-                            HorizontalAlignment="Left"
-                            Padding="20,8" />
-                </StackPanel>
-            </Border>
+                </Border>
+            </Grid>
 
             <!-- Progress Section -->
             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
@@ -144,16 +172,21 @@
                     <TextBlock Text="ℹ Information"
                                FontSize="16"
                                FontWeight="SemiBold" />
-                    <TextBlock TextWrapping="Wrap">
-                        <Run
-                            Text="• BA2 Archive Patcher: Converts BA2 archives between format versions. Required when downgrading or upgrading game versions." />
-                        <LineBreak /><LineBreak />
-                        <Run
-                            Text="• XDelta Patcher: Applies binary delta patches to game files in-place. The original file is automatically backed up before patching." />
-                        <LineBreak /><LineBreak />
-                        <Run
-                            Text="⚠ Warning: Backup files are created automatically, but keep additional backups of critical files!" />
-                    </TextBlock>
+                    <Grid ColumnDefinitions="*,20,*">
+                        <TextBlock Grid.Column="0" TextWrapping="Wrap">
+                            <Run FontWeight="Bold" Text="BA2 Archive Patcher" />
+                            <LineBreak />
+                            <Run Text="Converts BA2 archives between format versions. Required when downgrading (v1) or upgrading (v8) game versions." />
+                        </TextBlock>
+                        <TextBlock Grid.Column="2" TextWrapping="Wrap">
+                            <Run FontWeight="Bold" Text="XDelta Patcher" />
+                            <LineBreak />
+                            <Run Text="Applies binary delta patches to game files in-place. The original file is automatically backed up before patching." />
+                        </TextBlock>
+                    </Grid>
+                    <TextBlock Text="⚠ Warning: Backup files are created automatically, but keep additional backups of critical files!" 
+                               FontStyle="Italic" 
+                               Foreground="Orange"/>
                 </StackPanel>
             </Border>
         </StackPanel>

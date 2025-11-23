@@ -103,6 +103,7 @@ namespace EvilModToolkit.Tests.ViewModels
             var tools = new ToolsViewModel(
                 _ba2ArchiveService,
                 _xdeltaPatcherService,
+                _dialogService,
                 _toolsLogger);
 
             return (overview, f4se, scanner, settings, tools);

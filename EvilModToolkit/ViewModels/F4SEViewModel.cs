@@ -28,6 +28,7 @@ namespace EvilModToolkit.ViewModels
         private bool _showUniversal;
         private bool _showIncompatible;
         private string _pluginDirectory = string.Empty;
+        private bool _isNextGen;
 
         private readonly ObservableCollection<F4SePluginInfo> _allPlugins;
         private readonly ObservableCollection<F4SePluginInfo> _filteredPlugins;
@@ -81,6 +82,15 @@ namespace EvilModToolkit.ViewModels
         {
             get => _selectedPlugin;
             set => this.RaiseAndSetIfChanged(ref _selectedPlugin, value);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the installed game is Next Gen.
+        /// </summary>
+        public bool IsNextGen
+        {
+            get => _isNextGen;
+            private set => this.RaiseAndSetIfChanged(ref _isNextGen, value);
         }
 
         /// <summary>
@@ -188,21 +198,27 @@ namespace EvilModToolkit.ViewModels
             try
             {
                 var gameInfo = _gameDetectionService.DetectGame();
-                if (gameInfo != null && gameInfo.IsInstalled && !string.IsNullOrEmpty(gameInfo.InstallPath))
+                if (gameInfo != null && gameInfo.IsInstalled)
                 {
-                    PluginDirectory = Path.Combine(gameInfo.InstallPath, "Data", "F4SE", "Plugins");
-                    _logger.LogInformation("F4SE plugin directory set to: {PluginDirectory}", PluginDirectory);
+                    IsNextGen = gameInfo.IsNextGen;
+                    if (!string.IsNullOrEmpty(gameInfo.InstallPath))
+                    {
+                        PluginDirectory = Path.Combine(gameInfo.InstallPath, "Data", "F4SE", "Plugins");
+                        _logger.LogInformation("F4SE plugin directory set to: {PluginDirectory}", PluginDirectory);
+                    }
                 }
                 else
                 {
                     _logger.LogWarning("Game not detected, F4SE plugin directory not set");
                     PluginDirectory = string.Empty;
+                    IsNextGen = false;
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error detecting F4SE plugin directory");
                 PluginDirectory = string.Empty;
+                IsNextGen = false;
             }
         }
 

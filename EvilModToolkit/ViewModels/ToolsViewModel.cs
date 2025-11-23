@@ -1,5 +1,6 @@
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Patching;
+using EvilModToolkit.Services.Platform;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using System;
@@ -16,6 +17,7 @@ namespace EvilModToolkit.ViewModels
     {
         private readonly IBA2ArchiveService _ba2ArchiveService;
         private readonly IXDeltaPatcherService _xdeltaPatcherService;
+        private readonly IDialogService _dialogService;
         private readonly ILogger<ToolsViewModel> _logger;
 
         // BA2 Archive Patcher properties
@@ -31,21 +33,29 @@ namespace EvilModToolkit.ViewModels
         /// </summary>
         /// <param name="ba2ArchiveService">Service for BA2 archive manipulation.</param>
         /// <param name="xdeltaPatcherService">Service for applying xdelta patches.</param>
+        /// <param name="dialogService">Service for file dialogs.</param>
         /// <param name="logger">Logger for diagnostic messages.</param>
         /// <exception cref="ArgumentNullException">Thrown when any required service is null.</exception>
         public ToolsViewModel(
             IBA2ArchiveService ba2ArchiveService,
             IXDeltaPatcherService xdeltaPatcherService,
+            IDialogService dialogService,
             ILogger<ToolsViewModel> logger)
         {
             _ba2ArchiveService = ba2ArchiveService ?? throw new ArgumentNullException(nameof(ba2ArchiveService));
             _xdeltaPatcherService =
                 xdeltaPatcherService ?? throw new ArgumentNullException(nameof(xdeltaPatcherService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // Create ReactiveCommands for BA2 patching and xdelta patching
             PatchBA2Command = ReactiveCommand.CreateFromTask(PatchBA2Async);
             ApplyPatchCommand = ReactiveCommand.CreateFromTask(ApplyPatchAsync);
+
+            // Create browsing commands
+            BrowseSourceBA2Command = ReactiveCommand.CreateFromTask(BrowseSourceBA2Async);
+            BrowseSourceFileCommand = ReactiveCommand.CreateFromTask(BrowseSourceFileAsync);
+            BrowsePatchFileCommand = ReactiveCommand.CreateFromTask(BrowsePatchFileAsync);
         }
 
         #region BA2 Archive Patcher Properties
@@ -72,6 +82,11 @@ namespace EvilModToolkit.ViewModels
         /// Gets the command to patch a BA2 archive to the target version.
         /// </summary>
         public ReactiveCommand<Unit, Unit> PatchBA2Command { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the source BA2 archive.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseSourceBA2Command { get; }
 
         #endregion
 
@@ -100,6 +115,59 @@ namespace EvilModToolkit.ViewModels
         /// The patch will be applied in-place to the source file, with automatic backup creation.
         /// </summary>
         public ReactiveCommand<Unit, Unit> ApplyPatchCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the source file to patch.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseSourceFileCommand { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the xdelta patch file.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowsePatchFileCommand { get; }
+
+        #endregion
+
+        #region Browsing Methods
+
+        private async Task BrowseSourceBA2Async()
+        {
+            var file = await _dialogService.ShowFilePickerAsync(
+                "Select BA2 Archive",
+                "BA2 Archives",
+                new[] { "*.ba2" });
+
+            if (!string.IsNullOrEmpty(file))
+            {
+                SourceBA2Path = file;
+            }
+        }
+
+        private async Task BrowseSourceFileAsync()
+        {
+            var file = await _dialogService.ShowFilePickerAsync(
+                "Select Source File",
+                "Game Files",
+                new[] { "*.exe", "*.dll" });
+
+            if (!string.IsNullOrEmpty(file))
+            {
+                SourceFilePath = file;
+            }
+        }
+
+        private async Task BrowsePatchFileAsync()
+        {
+            var file = await _dialogService.ShowFilePickerAsync(
+                "Select Delta Patch File",
+                "XDelta Patches",
+                new[] { "*.xdelta" });
+
+            if (!string.IsNullOrEmpty(file))
+            {
+                PatchFilePath = file;
+            }
+        }
 
         #endregion
 
@@ -359,6 +427,9 @@ namespace EvilModToolkit.ViewModels
                 // Dispose ReactiveCommands to prevent memory leaks
                 PatchBA2Command?.Dispose();
                 ApplyPatchCommand?.Dispose();
+                BrowseSourceBA2Command?.Dispose();
+                BrowseSourceFileCommand?.Dispose();
+                BrowsePatchFileCommand?.Dispose();
             }
 
             base.Dispose(disposing);
