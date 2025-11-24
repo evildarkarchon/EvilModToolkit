@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -373,7 +374,8 @@ namespace EvilModToolkit.Tests.ViewModels
                 viewModel.TargetVersion = BA2Version.V8;
 
                 // Act
-                var commandTask = viewModel.PatchBA2Command.Execute().FirstAsync();
+                // Use ToTask() to subscribe immediately and get a Task representing the execution
+                var commandTask = viewModel.PatchBA2Command.Execute().ToTask();
 
                 // Assert - should be busy during execution
                 await Task.Delay(20);
