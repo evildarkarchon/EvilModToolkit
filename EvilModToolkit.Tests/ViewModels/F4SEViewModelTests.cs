@@ -184,8 +184,7 @@ namespace EvilModToolkit.Tests.ViewModels
 
                 // Create the expected plugin directory structure
                 var pluginDir = Path.Combine(tempDir, "Data", "F4SE", "Plugins");
-                Directory.CreateDirectory(pluginDir);
-
+                
                 // Create test plugins with different compatibility types
                 var plugins = new List<F4SePluginInfo>
                 {
@@ -224,6 +223,9 @@ namespace EvilModToolkit.Tests.ViewModels
                 _pluginService.ScanDirectory(Arg.Any<string>(), Arg.Any<bool>()).Returns(plugins);
 
                 var viewModel = new F4SEViewModel(_pluginService, _gameDetectionService, _logger);
+
+                // Create directory AFTER ViewModel to prevent auto-scan
+                Directory.CreateDirectory(pluginDir);
 
                 // Act - Execute command and wait for completion
                 await viewModel.ScanPluginsCommand.Execute().FirstAsync();
