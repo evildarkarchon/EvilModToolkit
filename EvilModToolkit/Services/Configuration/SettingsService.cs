@@ -45,7 +45,7 @@ public class SettingsService : ISettingsService
                 return GetDefaultSettings();
             }
 
-            var json = await File.ReadAllTextAsync(settingsPath);
+            var json = await File.ReadAllTextAsync(settingsPath).ConfigureAwait(false);
             var settings = JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings);
 
             if (settings == null)
@@ -79,7 +79,7 @@ public class SettingsService : ISettingsService
             }
 
             var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
-            await File.WriteAllTextAsync(settingsPath, json);
+            await File.WriteAllTextAsync(settingsPath, json).ConfigureAwait(false);
 
             _logger.LogInformation("Settings saved successfully to {Path}", settingsPath);
         }

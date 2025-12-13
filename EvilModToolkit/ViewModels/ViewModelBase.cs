@@ -113,23 +113,31 @@ namespace EvilModToolkit.ViewModels
         /// <summary>
         /// Creates a new cancellation token source for an operation.
         /// Cancels and disposes any existing token source.
+        /// Thread-safe using Interlocked.Exchange to prevent race conditions.
         /// </summary>
         protected void CreateCancellationTokenSource()
         {
-            CancelOperation();
-            _cancellationTokenSource = new CancellationTokenSource();
+            var newCts = new CancellationTokenSource();
+            var oldCts = Interlocked.Exchange(ref _cancellationTokenSource, newCts);
+
+            if (oldCts != null)
+            {
+                oldCts.Cancel();
+                oldCts.Dispose();
+            }
         }
 
         /// <summary>
         /// Cancels the current operation if one is in progress.
+        /// Thread-safe using Interlocked.Exchange to prevent race conditions.
         /// </summary>
         protected void CancelOperation()
         {
-            if (_cancellationTokenSource != null)
+            var cts = Interlocked.Exchange(ref _cancellationTokenSource, null);
+            if (cts != null)
             {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
+                cts.Cancel();
+                cts.Dispose();
             }
         }
 

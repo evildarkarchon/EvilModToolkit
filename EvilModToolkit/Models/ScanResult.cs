@@ -39,9 +39,9 @@ public class ScanResult
     public string Summary { get; init; } = string.Empty;
 
     /// <summary>
-    /// Suggested solution type, or a custom solution string
+    /// Suggested solution type for resolving the issue.
     /// </summary>
-    public object? Solution { get; init; } // Can be SolutionType enum or string
+    public SolutionType? Solution { get; init; }
 
     /// <summary>
     /// Optional list of related files with metadata (size/count, path)
@@ -68,7 +68,7 @@ public class ScanResult
         string summary,
         SeverityLevel severity = SeverityLevel.Warning,
         string? modName = null,
-        object? solution = null,
+        SolutionType? solution = null,
         List<(string Metadata, string FilePath)>? fileList = null,
         List<string>? extraData = null)
     {
@@ -88,12 +88,7 @@ public class ScanResult
     /// </summary>
     public string GetSolutionText()
     {
-        return Solution switch
-        {
-            SolutionType solutionType => GetSolutionDescription(solutionType),
-            string str => str,
-            _ => string.Empty
-        };
+        return Solution.HasValue ? GetSolutionDescription(Solution.Value) : string.Empty;
     }
 
     /// <summary>

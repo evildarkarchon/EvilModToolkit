@@ -108,7 +108,7 @@ public class ModScannerService : IModScannerService
                     SeverityLevel.Error
                 ));
             }
-        }, cancellationToken);
+        }, cancellationToken).ConfigureAwait(false);
 
         return results;
     }
@@ -284,16 +284,57 @@ public class ModScannerService : IModScannerService
         }
     }
 
+    private async Task CheckComplexSorterIniAsync(string filePath, string relativePath, List<ScanResult> results)
+    {
+        try
+        {
+            var lines = await File.ReadAllLinesAsync(filePath).ConfigureAwait(false);
+            bool errorFound = false;
+            foreach (var line in lines)
+            {
+                if (!line.TrimStart().StartsWith(";") &&
+                    (line.Contains("FindNode OBTS(FindNode \"Addon Index\"") ||
+                     line.Contains("FindNode OBTS(FindNode 'Addon Index'")))
+                {
+                    errorFound = true;
+                    break;
+                }
+            }
+
+            if (errorFound)
+            {
+                results.Add(new ScanResult(
+                    ProblemType.ComplexSorter,
+                    filePath,
+                    relativePath,
+                    "INI uses an outdated field name. xEdit 4.1.5g changed 'Addon Index' to 'Parent Combination Index'.",
+                    SeverityLevel.Error,
+                    solution: SolutionType.ComplexSorterFix
+                ));
+            }
+        }
+        catch
+        {
+            // Ignore read errors
+        }
+    }
+
+    /// <summary>
+    /// Synchronous wrapper for CheckComplexSorterIniAsync for use in synchronous scan context.
+    /// Uses blocking wait since this is called from within Task.Run().
+    /// </summary>
     private void CheckComplexSorterIni(string filePath, string relativePath, List<ScanResult> results)
     {
+        // Since this is already running on a thread pool thread via Task.Run,
+        // we can safely use synchronous file I/O here
         try
         {
             var lines = File.ReadAllLines(filePath);
             bool errorFound = false;
             foreach (var line in lines)
             {
-                if (!line.TrimStart().StartsWith(";") && 
-                    (line.Contains("FindNode OBTS(FindNode \"Addon Index\"") || 
+                if (!line.TrimStart().StartsWith(";") &&
+                    (line.Contains("FindNode OBTS(FindNode \"Addon Index\"") ||
                      line.Contains("FindNode OBTS(FindNode 'Addon Index'")))
                 {
                     errorFound = true;

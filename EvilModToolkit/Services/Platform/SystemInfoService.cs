@@ -27,7 +27,7 @@ public class SystemInfoService : ISystemInfoService
         try
         {
             // Run WMI queries on a background thread to avoid blocking
-            return await Task.Run(() => CollectSystemInfo());
+            return await Task.Run(() => CollectSystemInfo()).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

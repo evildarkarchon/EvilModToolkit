@@ -66,8 +66,12 @@ namespace EvilModToolkit.ViewModels
             BrowseF4SEScanDirectoryCommand = ReactiveCommand.CreateFromTask(BrowseF4SEScanDirectoryAsync);
             BrowseBA2PatchDirectoryCommand = ReactiveCommand.CreateFromTask(BrowseBA2PatchDirectoryAsync);
 
-            // Load settings asynchronously on construction
-            _ = LoadSettingsAsync();
+            // Load settings asynchronously on construction with error handling
+            _ = LoadSettingsAsync().ContinueWith(t =>
+            {
+                if (t.IsFaulted && t.Exception != null)
+                    _logger.LogError(t.Exception, "Failed to load settings during construction");
+            }, System.Threading.Tasks.TaskScheduler.Default);
         }
 
         #region Properties

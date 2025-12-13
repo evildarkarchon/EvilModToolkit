@@ -122,7 +122,7 @@ public class XDeltaPatcherService : IXDeltaPatcherService
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            await process.WaitForExitAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
 
             var exitCode = process.ExitCode;
             var stdoutStr = stdout.ToString();
@@ -293,7 +293,7 @@ public class XDeltaPatcherService : IXDeltaPatcherService
             // Check for xdelta3 magic bytes (VCDIFF format)
             // VCDIFF files start with magic bytes: 0xD6 0xC3 0xC4 (VCD in ASCII-ish)
             var buffer = new byte[4];
-            var bytesRead = await patchStream.ReadAsync(buffer, 0, 4);
+            var bytesRead = await patchStream.ReadAsync(buffer, 0, 4).ConfigureAwait(false);
 
             if (bytesRead < 4)
             {

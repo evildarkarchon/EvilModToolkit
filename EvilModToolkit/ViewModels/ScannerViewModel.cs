@@ -175,5 +175,21 @@ public class ScannerViewModel : ViewModelBase
         CancelOperation();
     }
 
+    /// <summary>
+    /// Disposes resources used by the ViewModel.
+    /// Ensures commands are properly disposed to prevent memory leaks.
+    /// </summary>
+    /// <param name="disposing">True if disposing managed resources.</param>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            ScanCommand?.Dispose();
+            CancelScanCommand?.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
+
     #endregion
 }

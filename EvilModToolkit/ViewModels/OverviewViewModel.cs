@@ -273,13 +273,13 @@ namespace EvilModToolkit.ViewModels
         /// <summary>
         /// Detects F4SE installation and version.
         /// </summary>
-        private async Task DetectF4SeAsync()
+        private Task DetectF4SeAsync()
         {
             if (GameInfo == null || string.IsNullOrEmpty(GameInfo.InstallPath))
             {
                 IsF4SeInstalled = false;
                 F4SeVersion = null;
-                return;
+                return Task.CompletedTask;
             }
 
             try
@@ -324,13 +324,13 @@ namespace EvilModToolkit.ViewModels
                 F4SeVersion = null;
             }
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Scans the Data directory for BA2 archives and counts them by type and version.
         /// </summary>
-        private async Task ScanBA2ArchivesAsync()
+        private Task ScanBA2ArchivesAsync()
         {
             // Reset counts
             BA2CountGeneral = 0;
@@ -342,13 +342,13 @@ namespace EvilModToolkit.ViewModels
             if (GameInfo == null || string.IsNullOrEmpty(GameInfo.DataPath))
             {
                 _logger.LogDebug("Cannot scan BA2 archives: Data path is null");
-                return;
+                return Task.CompletedTask;
             }
 
             if (!Directory.Exists(GameInfo.DataPath))
             {
                 _logger.LogWarning("Data directory does not exist: {DataPath}", GameInfo.DataPath);
-                return;
+                return Task.CompletedTask;
             }
 
             try
@@ -420,7 +420,7 @@ namespace EvilModToolkit.ViewModels
                 _logger.LogError(ex, "Error scanning BA2 archives");
             }
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         protected override void Dispose(bool disposing)

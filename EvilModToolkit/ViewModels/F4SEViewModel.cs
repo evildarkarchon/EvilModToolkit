@@ -62,9 +62,10 @@ namespace EvilModToolkit.ViewModels
             DetectPluginDirectory();
 
             // Perform initial scan if plugin directory is valid
+            // Use ReactiveCommand execution pattern for proper error handling
             if (!string.IsNullOrEmpty(PluginDirectory) && System.IO.Directory.Exists(PluginDirectory))
             {
-                _ = ScanPluginsAsync();
+                _ = ScanPluginsCommand.Execute().Subscribe();
             }
         }
 

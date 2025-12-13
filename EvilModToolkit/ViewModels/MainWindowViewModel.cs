@@ -207,16 +207,16 @@ namespace EvilModToolkit.ViewModels
                 _logger.LogDebug("Disposing MainWindowViewModel and all child ViewModels");
 
                 // Dispose all child ViewModels - important because they are Transient
-                // and owned by this ViewModel
-                _overviewViewModel?.Dispose();
-                _f4seViewModel?.Dispose();
-                _scannerViewModel?.Dispose();
-                _settingsViewModel?.Dispose();
-                _toolsViewModel?.Dispose();
+                // and owned by this ViewModel (guaranteed non-null by constructor validation)
+                _overviewViewModel.Dispose();
+                _f4seViewModel.Dispose();
+                _scannerViewModel.Dispose();
+                _settingsViewModel.Dispose();
+                _toolsViewModel.Dispose();
 
                 // Dispose ReactiveCommands to clean up subscriptions
-                ExitCommand?.Dispose();
-                AboutCommand?.Dispose();
+                ExitCommand.Dispose();
+                AboutCommand.Dispose();
             }
 
             base.Dispose(disposing);
