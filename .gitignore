@@ -482,3 +482,4 @@ FodyWeavers.xsd
 .gemini/
 gha-creds-*.json
 EvilModToolkit.code-workspace
+plans/

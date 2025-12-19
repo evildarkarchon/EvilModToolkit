@@ -1,12 +1,13 @@
+using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Reactive;
+using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Patching;
 using EvilModToolkit.Services.Platform;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using System;
-using System.IO;
-using System.Reactive;
-using System.Threading.Tasks;
 
 namespace EvilModToolkit.ViewModels
 {
@@ -23,6 +24,11 @@ namespace EvilModToolkit.ViewModels
         // BA2 Archive Patcher properties
         private string _sourceBA2Path = string.Empty;
         private BA2Version _targetVersion = BA2Version.V1;
+        private bool _isDirectoryMode = true;
+        private string _sourceDirectory = string.Empty;
+        private bool _includeSubdirectories = false;
+        private BatchPatchSummary? _lastBatchResult;
+        private ObservableCollection<BatchPatchResult> _batchResults = new();
 
         // Game Patcher (xdelta) properties
         private string _sourceFilePath = string.Empty;
@@ -54,11 +60,39 @@ namespace EvilModToolkit.ViewModels
 
             // Create browsing commands
             BrowseSourceBA2Command = ReactiveCommand.CreateFromTask(BrowseSourceBA2Async);
+            BrowseSourceDirectoryCommand = ReactiveCommand.CreateFromTask(BrowseSourceDirectoryAsync);
             BrowseSourceFileCommand = ReactiveCommand.CreateFromTask(BrowseSourceFileAsync);
             BrowsePatchFileCommand = ReactiveCommand.CreateFromTask(BrowsePatchFileAsync);
         }
 
         #region BA2 Archive Patcher Properties
+
+        /// <summary>
+        /// Gets or sets whether to operate in directory mode (batch) or single file mode.
+        /// </summary>
+        public bool IsDirectoryMode
+        {
+            get => _isDirectoryMode;
+            set => this.RaiseAndSetIfChanged(ref _isDirectoryMode, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the path to the source directory containing BA2 files.
+        /// </summary>
+        public string SourceDirectory
+        {
+            get => _sourceDirectory;
+            set => this.RaiseAndSetIfChanged(ref _sourceDirectory, value);
+        }
+
+        /// <summary>
+        /// Gets or sets whether to include subdirectories in batch operations.
+        /// </summary>
+        public bool IncludeSubdirectories
+        {
+            get => _includeSubdirectories;
+            set => this.RaiseAndSetIfChanged(ref _includeSubdirectories, value);
+        }
 
         /// <summary>
         /// Gets or sets the path to the source BA2 archive file to patch.
@@ -79,6 +113,20 @@ namespace EvilModToolkit.ViewModels
         }
 
         /// <summary>
+        /// Gets the last batch operation result summary.
+        /// </summary>
+        public BatchPatchSummary? LastBatchResult
+        {
+            get => _lastBatchResult;
+            set => this.RaiseAndSetIfChanged(ref _lastBatchResult, value);
+        }
+
+        /// <summary>
+        /// Gets the collection of individual file results from the last batch operation.
+        /// </summary>
+        public ObservableCollection<BatchPatchResult> BatchResults => _batchResults;
+
+        /// <summary>
         /// Gets the command to patch a BA2 archive to the target version.
         /// </summary>
         public ReactiveCommand<Unit, Unit> PatchBA2Command { get; }
@@ -87,6 +135,11 @@ namespace EvilModToolkit.ViewModels
         /// Gets the command to browse for the source BA2 archive.
         /// </summary>
         public ReactiveCommand<Unit, Unit> BrowseSourceBA2Command { get; }
+
+        /// <summary>
+        /// Gets the command to browse for the source directory.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> BrowseSourceDirectoryCommand { get; }
 
         #endregion
 
@@ -143,6 +196,18 @@ namespace EvilModToolkit.ViewModels
             }
         }
 
+        private async Task BrowseSourceDirectoryAsync()
+        {
+            var folder = await _dialogService.ShowFolderPickerAsync(
+                "Select Directory with BA2 Archives",
+                SourceDirectory);
+
+            if (!string.IsNullOrEmpty(folder))
+            {
+                SourceDirectory = folder;
+            }
+        }
+
         private async Task BrowseSourceFileAsync()
         {
             var file = await _dialogService.ShowFilePickerAsync(
@@ -174,76 +239,131 @@ namespace EvilModToolkit.ViewModels
         #region BA2 Patching Methods
 
         /// <summary>
-        /// Patches a BA2 archive file to the specified target version.
+        /// Patches BA2 archive(s) to the specified target version.
         /// </summary>
         /// <returns>A task representing the async operation.</returns>
         private async Task PatchBA2Async()
         {
             IsBusy = true;
+            ProgressPercentage = 0;
+            BatchResults.Clear();
+            LastBatchResult = null;
+
             try
             {
-                // Execute with error handling provided by ViewModelBase
-                if (!await TryExecuteAsync(async () =>
-                    {
-                        SetStatus("Patching BA2 archive...");
-                        _logger.LogInformation("Starting BA2 patch operation: {SourcePath} -> {TargetVersion}",
-                            SourceBA2Path, TargetVersion);
-
-                        // Validate input path
-                        if (string.IsNullOrWhiteSpace(SourceBA2Path))
-                        {
-                            throw new InvalidOperationException("Source BA2 path is required.");
-                        }
-
-                        if (!File.Exists(SourceBA2Path))
-                        {
-                            throw new FileNotFoundException($"Source BA2 file not found: {SourceBA2Path}");
-                        }
-
-                        // Validate that the file is a valid BA2 archive
-                        if (!_ba2ArchiveService.IsValidBA2(SourceBA2Path))
-                        {
-                            throw new InvalidOperationException(
-                                $"The file is not a valid BA2 archive: {SourceBA2Path}");
-                        }
-
-                        // Get current archive info to display before patching
-                        var archiveInfo = _ba2ArchiveService.GetArchiveInfo(SourceBA2Path);
-                        if (archiveInfo != null)
-                        {
-                            _logger.LogInformation("Current BA2 version: {CurrentVersion}, Target: {TargetVersion}",
-                                archiveInfo.Version, TargetVersion);
-
-                            // Check if already at target version
-                            if (archiveInfo.Version == TargetVersion)
-                            {
-                                SetStatus($"Archive is already at version {TargetVersion}.");
-                                _logger.LogInformation("BA2 archive already at target version");
-                                return;
-                            }
-                        }
-
-                        // Perform the patch operation (synchronous operation wrapped in Task.Run for UI responsiveness)
-                        bool success = await Task.Run(() =>
-                            _ba2ArchiveService.PatchArchiveVersion(SourceBA2Path, TargetVersion));
-
-                        if (success)
-                        {
-                            SetStatus($"Successfully patched BA2 archive to version {TargetVersion}.");
-                            _logger.LogInformation("BA2 patch completed successfully");
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("BA2 patching failed. See logs for details.");
-                        }
-                    }, _logger))
+                if (IsDirectoryMode)
                 {
-                    _logger.LogError("BA2 patch operation failed");
+                    await PatchDirectoryAsync();
+                }
+                else
+                {
+                    await PatchSingleFileAsync();
                 }
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private async Task PatchDirectoryAsync()
+        {
+            // Validate directory
+            if (string.IsNullOrWhiteSpace(SourceDirectory) || !Directory.Exists(SourceDirectory))
+            {
+                SetError("Please select a valid directory.");
+                return;
+            }
+
+            CreateCancellationTokenSource();
+
+            if (!await TryExecuteAsync(async () =>
+            {
+                var progress = new Progress<PatchProgress>(p =>
+                {
+                    ProgressPercentage = p.Percentage;
+                    SetStatus(p.Message);
+                });
+
+                var result = await _ba2ArchiveService.BatchPatchDirectoryAsync(
+                    SourceDirectory,
+                    TargetVersion,
+                    IncludeSubdirectories,
+                    progress,
+                    CancellationToken);
+
+                LastBatchResult = result;
+                foreach (var r in result.Results)
+                {
+                    BatchResults.Add(r);
+                }
+
+                SetStatus($"Completed: {result.SuccessCount} patched, {result.SkippedCount} skipped, {result.FailedCount} failed");
+            }, _logger))
+            {
+                _logger.LogError("Batch BA2 patch operation failed");
+            }
+        }
+
+        private async Task PatchSingleFileAsync()
+        {
+            // Execute with error handling provided by ViewModelBase
+            if (!await TryExecuteAsync(async () =>
+                {
+                    SetStatus("Patching BA2 archive...");
+                    _logger.LogInformation("Starting BA2 patch operation: {SourcePath} -> {TargetVersion}",
+                        SourceBA2Path, TargetVersion);
+
+                    // Validate input path
+                    if (string.IsNullOrWhiteSpace(SourceBA2Path))
+                    {
+                        throw new InvalidOperationException("Source BA2 path is required.");
+                    }
+
+                    if (!File.Exists(SourceBA2Path))
+                    {
+                        throw new FileNotFoundException($"Source BA2 file not found: {SourceBA2Path}");
+                    }
+
+                    // Validate that the file is a valid BA2 archive
+                    if (!_ba2ArchiveService.IsValidBA2(SourceBA2Path))
+                    {
+                        throw new InvalidOperationException(
+                            $"The file is not a valid BA2 archive: {SourceBA2Path}");
+                    }
+
+                    // Get current archive info to display before patching
+                    var archiveInfo = _ba2ArchiveService.GetArchiveInfo(SourceBA2Path);
+                    if (archiveInfo != null)
+                    {
+                        _logger.LogInformation("Current BA2 version: {CurrentVersion}, Target: {TargetVersion}",
+                            archiveInfo.Version, TargetVersion);
+
+                        // Check if already at target version
+                        if (archiveInfo.Version == TargetVersion)
+                        {
+                            SetStatus($"Archive is already at version {TargetVersion}.");
+                            _logger.LogInformation("BA2 archive already at target version");
+                            return;
+                        }
+                    }
+
+                    // Perform the patch operation (synchronous operation wrapped in Task.Run for UI responsiveness)
+                    bool success = await Task.Run(() =>
+                        _ba2ArchiveService.PatchArchiveVersion(SourceBA2Path, TargetVersion));
+
+                    if (success)
+                    {
+                        SetStatus($"Successfully patched BA2 archive to version {TargetVersion}.");
+                        _logger.LogInformation("BA2 patch completed successfully");
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("BA2 patching failed. See logs for details.");
+                    }
+                }, _logger))
+            {
+                _logger.LogError("BA2 patch operation failed");
             }
         }
 

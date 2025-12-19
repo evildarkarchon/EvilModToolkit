@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using Microsoft.Extensions.Logging;
 
@@ -184,5 +186,113 @@ public class BA2ArchiveService : IBA2ArchiveService
         // Use the optimized header reading method
         var (version, type) = ReadHeaderInfo(filePath);
         return version != BA2Version.Unknown && type != BA2Type.Unknown;
+    }
+
+    /// <inheritdoc />
+    public string[] GetBA2FilesInDirectory(string directoryPath, bool includeSubdirectories = false)
+    {
+        if (!Directory.Exists(directoryPath))
+        {
+            _logger.LogWarning("Directory not found: {DirectoryPath}", directoryPath);
+            return Array.Empty<string>();
+        }
+
+        var searchOption = includeSubdirectories
+            ? SearchOption.AllDirectories
+            : SearchOption.TopDirectoryOnly;
+
+        try
+        {
+            return Directory.GetFiles(directoryPath, "*.ba2", searchOption);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing BA2 files in directory: {DirectoryPath}", directoryPath);
+            return Array.Empty<string>();
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<BatchPatchSummary> BatchPatchDirectoryAsync(
+        string directoryPath,
+        BA2Version targetVersion,
+        bool includeSubdirectories = false,
+        IProgress<PatchProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        var summary = new BatchPatchSummary();
+        var ba2Files = GetBA2FilesInDirectory(directoryPath, includeSubdirectories);
+        summary.TotalFiles = ba2Files.Length;
+
+        _logger.LogInformation("Starting batch patch for {Count} files in {Directory}",
+            summary.TotalFiles, directoryPath);
+
+        for (int i = 0; i < ba2Files.Length; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var filePath = ba2Files[i];
+            var fileName = Path.GetFileName(filePath);
+            var percentage = (int)((i + 1) / (double)summary.TotalFiles * 100);
+
+            progress?.Report(new PatchProgress
+            {
+                Stage = PatchStage.Patching,
+                Percentage = percentage,
+                Message = $"Patching {fileName} ({i + 1}/{summary.TotalFiles})"
+            });
+
+            var result = new BatchPatchResult
+            {
+                FilePath = filePath,
+                FileName = fileName,
+                TargetVersion = targetVersion
+            };
+
+            try
+            {
+                // Get current info to check if patching is needed
+                var archiveInfo = GetArchiveInfo(filePath);
+                result.OriginalVersion = archiveInfo?.Version;
+
+                if (archiveInfo?.Version == targetVersion)
+                {
+                    result.Success = true;
+                    result.ErrorMessage = "Already at target version";
+                    summary.SkippedCount++;
+                    _logger.LogDebug("Skipping {File} - already at version {Version}", fileName, targetVersion);
+                }
+                else
+                {
+                    // Run patching on background thread to avoid blocking
+                    var success = await Task.Run(() => PatchArchiveVersion(filePath, targetVersion), cancellationToken);
+                    result.Success = success;
+
+                    if (success)
+                    {
+                        summary.SuccessCount++;
+                    }
+                    else
+                    {
+                        result.ErrorMessage = "Patching failed";
+                        summary.FailedCount++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = ex.Message;
+                summary.FailedCount++;
+                _logger.LogError(ex, "Error processing file in batch: {FilePath}", filePath);
+            }
+
+            summary.Results.Add(result);
+        }
+
+        _logger.LogInformation("Batch patch completed. Success: {Success}, Skipped: {Skipped}, Failed: {Failed}",
+            summary.SuccessCount, summary.SkippedCount, summary.FailedCount);
+
+        return summary;
     }
 }

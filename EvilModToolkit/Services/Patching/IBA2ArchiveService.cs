@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using EvilModToolkit.Models;
 
 namespace EvilModToolkit.Services.Patching;
@@ -28,4 +31,28 @@ public interface IBA2ArchiveService
     /// <param name="filePath">Path to check.</param>
     /// <returns>True if the file is a valid BA2 archive.</returns>
     bool IsValidBA2(string filePath);
+
+    /// <summary>
+    /// Gets all BA2 files in a directory.
+    /// </summary>
+    /// <param name="directoryPath">Path to the directory.</param>
+    /// <param name="includeSubdirectories">Whether to search subdirectories.</param>
+    /// <returns>Array of BA2 file paths.</returns>
+    string[] GetBA2FilesInDirectory(string directoryPath, bool includeSubdirectories = false);
+
+    /// <summary>
+    /// Patches all BA2 archives in a directory to the specified version.
+    /// </summary>
+    /// <param name="directoryPath">Path to the directory containing BA2 files.</param>
+    /// <param name="targetVersion">Target version to patch to.</param>
+    /// <param name="includeSubdirectories">Whether to search subdirectories.</param>
+    /// <param name="progress">Optional progress reporter.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>Summary of the batch patching operation.</returns>
+    Task<BatchPatchSummary> BatchPatchDirectoryAsync(
+        string directoryPath,
+        BA2Version targetVersion,
+        bool includeSubdirectories = false,
+        IProgress<PatchProgress>? progress = null,
+        CancellationToken cancellationToken = default);
 }

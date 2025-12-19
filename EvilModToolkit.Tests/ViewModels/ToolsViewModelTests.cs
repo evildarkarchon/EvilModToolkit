@@ -1,3 +1,10 @@
+using System;
+using System.IO;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading;
+using System.Threading.Tasks;
 using EvilModToolkit.Models;
 using EvilModToolkit.Services.Patching;
 using EvilModToolkit.Services.Platform;
@@ -6,13 +13,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System;
-using System.IO;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace EvilModToolkit.Tests.ViewModels
@@ -188,6 +188,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+            viewModel.IsDirectoryMode = false;
             viewModel.SourceBA2Path = string.Empty;
 
             // Act
@@ -202,6 +203,7 @@ namespace EvilModToolkit.Tests.ViewModels
         {
             // Arrange
             var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+            viewModel.IsDirectoryMode = false;
             viewModel.SourceBA2Path = @"C:\NonExistent\Archive.ba2";
             viewModel.TargetVersion = BA2Version.V8;
 
@@ -225,6 +227,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _ba2ArchiveService.IsValidBA2(tempFile).Returns(false);
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+                viewModel.IsDirectoryMode = false;
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -260,6 +263,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _ba2ArchiveService.PatchArchiveVersion(tempFile, BA2Version.V8).Returns(true);
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+                viewModel.IsDirectoryMode = false;
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -295,6 +299,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 });
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+                viewModel.IsDirectoryMode = false;
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -330,6 +335,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 _ba2ArchiveService.PatchArchiveVersion(tempFile, BA2Version.V8).Returns(false);
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+                viewModel.IsDirectoryMode = false;
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -370,6 +376,7 @@ namespace EvilModToolkit.Tests.ViewModels
                 });
 
                 var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+                viewModel.IsDirectoryMode = false;
                 viewModel.SourceBA2Path = tempFile;
                 viewModel.TargetVersion = BA2Version.V8;
 
@@ -391,6 +398,52 @@ namespace EvilModToolkit.Tests.ViewModels
             {
                 if (File.Exists(tempFile))
                     File.Delete(tempFile);
+            }
+        }
+
+        [Fact]
+        public async Task PatchBA2Command_ExecutesBatchPatch_WhenInDirectoryMode()
+        {
+            // Arrange
+            var tempDir = Path.Combine(Path.GetTempPath(), "BatchTest_" + Guid.NewGuid());
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var viewModel = new ToolsViewModel(_ba2ArchiveService, _xdeltaPatcherService, _dialogService, _logger);
+                viewModel.IsDirectoryMode = true;
+                viewModel.SourceDirectory = tempDir;
+                viewModel.TargetVersion = BA2Version.V8;
+
+                var expectedSummary = new BatchPatchSummary
+                {
+                    TotalFiles = 2,
+                    SuccessCount = 1,
+                    SkippedCount = 1,
+                    FailedCount = 0
+                };
+                expectedSummary.Results.Add(new BatchPatchResult { FileName = "file1.ba2", Success = true });
+                expectedSummary.Results.Add(new BatchPatchResult { FileName = "file2.ba2", Success = true, ErrorMessage = "Already at target version" });
+
+                _ba2ArchiveService.BatchPatchDirectoryAsync(
+                    tempDir,
+                    BA2Version.V8,
+                    Arg.Any<bool>(),
+                    Arg.Any<IProgress<PatchProgress>>(),
+                    Arg.Any<CancellationToken>())
+                    .Returns(Task.FromResult(expectedSummary));
+
+                // Act
+                await viewModel.PatchBA2Command.Execute().FirstAsync();
+
+                // Assert
+                viewModel.LastBatchResult.Should().Be(expectedSummary);
+                viewModel.BatchResults.Should().HaveCount(2);
+                viewModel.StatusMessage.Should().Contain("Completed: 1 patched, 1 skipped, 0 failed");
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir))
+                    Directory.Delete(tempDir);
             }
         }
 
@@ -768,8 +821,8 @@ namespace EvilModToolkit.Tests.ViewModels
             var selectedFile = @"C:\Archives\Test.ba2";
 
             _dialogService.ShowFilePickerAsync(
-                Arg.Any<string>(), 
-                Arg.Any<string>(), 
+                Arg.Any<string>(),
+                Arg.Any<string>(),
                 Arg.Any<string[]>())
                 .Returns(Task.FromResult((string?)selectedFile));
 
@@ -789,8 +842,8 @@ namespace EvilModToolkit.Tests.ViewModels
             viewModel.SourceBA2Path = initialPath;
 
             _dialogService.ShowFilePickerAsync(
-                Arg.Any<string>(), 
-                Arg.Any<string>(), 
+                Arg.Any<string>(),
+                Arg.Any<string>(),
                 Arg.Any<string[]>())
                 .Returns(Task.FromResult<string?>(null));
 
@@ -809,8 +862,8 @@ namespace EvilModToolkit.Tests.ViewModels
             var selectedFile = @"C:\Games\Fallout4.exe";
 
             _dialogService.ShowFilePickerAsync(
-                Arg.Any<string>(), 
-                Arg.Any<string>(), 
+                Arg.Any<string>(),
+                Arg.Any<string>(),
                 Arg.Any<string[]>())
                 .Returns(Task.FromResult((string?)selectedFile));
 
@@ -829,8 +882,8 @@ namespace EvilModToolkit.Tests.ViewModels
             var selectedFile = @"C:\Patches\patch.xdelta";
 
             _dialogService.ShowFilePickerAsync(
-                Arg.Any<string>(), 
-                Arg.Any<string>(), 
+                Arg.Any<string>(),
+                Arg.Any<string>(),
                 Arg.Any<string[]>())
                 .Returns(Task.FromResult((string?)selectedFile));
 

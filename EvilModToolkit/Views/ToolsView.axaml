@@ -37,8 +37,35 @@
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                                    TextWrapping="Wrap" />
 
-                        <!-- Source BA2 File -->
-                        <StackPanel Spacing="5">
+                        <!-- Mode Toggle -->
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="Mode:" VerticalAlignment="Center" />
+                            <RadioButton Content="Directory (Batch)"
+                                         IsChecked="{Binding IsDirectoryMode}"
+                                         GroupName="BA2Mode" />
+                            <RadioButton Content="Single File"
+                                         IsChecked="{Binding !IsDirectoryMode}"
+                                         GroupName="BA2Mode" />
+                        </StackPanel>
+
+                        <!-- Directory Selection (shown when IsDirectoryMode is true) -->
+                        <StackPanel Spacing="5" IsVisible="{Binding IsDirectoryMode}">
+                            <TextBlock Text="Source Directory:" />
+                            <Grid ColumnDefinitions="*,10,Auto">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding SourceDirectory}"
+                                         Watermark="Select a directory containing BA2 files..."
+                                         IsReadOnly="False" />
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Command="{Binding BrowseSourceDirectoryCommand}" />
+                            </Grid>
+                            <CheckBox Content="Include subdirectories"
+                                      IsChecked="{Binding IncludeSubdirectories}" />
+                        </StackPanel>
+
+                        <!-- Single File Selection (shown when IsDirectoryMode is false) -->
+                        <StackPanel Spacing="5" IsVisible="{Binding !IsDirectoryMode}">
                             <TextBlock Text="Source BA2 Archive:" />
                             <Grid ColumnDefinitions="*,10,Auto">
                                 <TextBox Grid.Column="0"
@@ -64,11 +91,31 @@
                         </StackPanel>
 
                         <!-- Patch Button -->
-                        <Button Content="Patch BA2 Archive"
+                        <Button Content="Patch BA2 Archives"
                                 Command="{Binding PatchBA2Command}"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"
                                 Padding="20,8" />
+
+                        <!-- Batch Results Summary -->
+                        <Border IsVisible="{Binding LastBatchResult, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                Padding="10"
+                                CornerRadius="3">
+                            <StackPanel Spacing="5">
+                                <TextBlock Text="Batch Results:" FontWeight="SemiBold" />
+                                <TextBlock>
+                                    <Run Text="Total: " />
+                                    <Run Text="{Binding LastBatchResult.TotalFiles}" />
+                                    <Run Text=" | Patched: " />
+                                    <Run Text="{Binding LastBatchResult.SuccessCount}" Foreground="Green" />
+                                    <Run Text=" | Skipped: " />
+                                    <Run Text="{Binding LastBatchResult.SkippedCount}" Foreground="Orange" />
+                                    <Run Text=" | Failed: " />
+                                    <Run Text="{Binding LastBatchResult.FailedCount}" Foreground="Red" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
 
